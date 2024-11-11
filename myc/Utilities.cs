@@ -4,31 +4,16 @@ namespace myc
 {
     public static class Utilities
     {
-        public static void RunGCCPreprocessor(string fileName)
+        internal static void RunGCCPreprocessor(string fileName)
         {
             string cmd = string.Format("-E -P {0} -o {1}.prep", fileName, fileName.Split('.')[0]);
             RunGccCommand(cmd);
         }
 
-        public static void CleanUpGCCPreprocessor(string filePath)
+        internal static void CleanUpGCCPreprocessor(string filePath)
         {
-            try
-            {
-                string prepFilePath = filePath.Split('.')[0] + ".prep";
-                if (File.Exists(prepFilePath))
-                {
-                    File.Delete(prepFilePath);
-                    //Console.WriteLine("File deleted successfully.");
-                }
-                else
-                {
-                    //Console.WriteLine("File not found.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-            }
+            string prepFilePath = filePath.Split('.')[0] + ".prep";
+            DeleteFile(prepFilePath);
         }
 
         internal static void GCCCompile(string filePath)
@@ -44,24 +29,11 @@ namespace myc
         }
         internal static void CleanUpAssembleAndLink(string filePath)
         {
-            try
-            {
-                string prepFilePath = filePath.Split('.')[0] + ".s";
-                if (File.Exists(prepFilePath))
-                {
-                    File.Delete(prepFilePath);
-                    //Console.WriteLine("File deleted successfully.");
-                }
-                else
-                {
-                    //Console.WriteLine("File not found.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-            }
+            string prepFilePath = filePath.Split('.')[0] + ".s";
+            DeleteFile(prepFilePath);
         }
+
+
 
         private static void RunGccCommand(string command)
         {
@@ -82,6 +54,25 @@ namespace myc
             // Console.WriteLine(output);
         }
 
+        private static void DeleteFile(string prepFilePath)
+        {
+            try
+            {
+                if (File.Exists(prepFilePath))
+                {
+                    File.Delete(prepFilePath);
+                    //Console.WriteLine("File deleted successfully.");
+                }
+                else
+                {
+                    //Console.WriteLine("File not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
 
     }
 }
