@@ -4,16 +4,17 @@
 	"name": "C# (.NET)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/dotnet:8.0-bookworm",
+	"runArgs": ["--name", "dotnet_csharp"],
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"ms-dotnettools.csharp",
 				"ms-dotnettools.csdevkit",
-				"ms-dotnettools.vscode-dotnet-runtime"
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-python.python"
 			]
 		}
 	},
-
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
