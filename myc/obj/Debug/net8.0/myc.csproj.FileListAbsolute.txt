@@ -1,0 +1,15 @@
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.AssemblyInfoInputs.cache
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.AssemblyInfo.cs
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.csproj.CoreCompileInputs.cache
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.sourcelink.json
+/workspaces/writing-a-c-compiler-tests/myc/bin/Debug/net8.0/myc
+/workspaces/writing-a-c-compiler-tests/myc/bin/Debug/net8.0/myc.deps.json
+/workspaces/writing-a-c-compiler-tests/myc/bin/Debug/net8.0/myc.runtimeconfig.json
+/workspaces/writing-a-c-compiler-tests/myc/bin/Debug/net8.0/myc.dll
+/workspaces/writing-a-c-compiler-tests/myc/bin/Debug/net8.0/myc.pdb
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.dll
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/refint/myc.dll
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.pdb
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/myc.genruntimeconfig.cache
+/workspaces/writing-a-c-compiler-tests/myc/obj/Debug/net8.0/ref/myc.dll
