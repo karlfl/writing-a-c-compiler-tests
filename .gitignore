@@ -2,5 +2,3 @@
 mycc
 *.s
 .fake
-*.bin
-*.obj
