@@ -1,4 +1,4 @@
-//lThis is a test
+//This is a test
 int main(void) {
     return 2;
 }

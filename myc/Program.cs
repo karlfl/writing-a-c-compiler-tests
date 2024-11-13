@@ -5,10 +5,6 @@ internal class Program
 {
     private static int Main(string[] args)
     {
-        bool runLexer = false;   // Run lexer
-        bool runParser = false;  // Run Lexer and Parser
-        bool runCodeGen = false; // Run Lexer, Parser and Assembly Generator
-
         Console.WriteLine("Hello, World!");
 
         Console.WriteLine("\nArguments:");
@@ -25,13 +21,16 @@ internal class Program
         }
 
         // Check for arg flags
-        runLexer = args.Contains("--lex");
-        runParser = args.Contains("--parse");
-        runCodeGen = args.Contains("--codeGen");
+        // --codeGen = Run Lexer, Parser and Assembly Generator
+        // --parser = Run Lexer and Parser
+        // --lex = Run lexer
+        bool runCodeGen = args.Contains("--codeGen");
+        bool runParser  = args.Contains("--parse")    || runCodeGen;
+        bool runLexer   = args.Contains("--lex")      || runCodeGen || runParser;
 
         string programFile = args[0];
 
-        MyCompiler.Compile(programFile);
+        MyCompiler.Compile(programFile, runLexer, runParser, runCodeGen);
         return 0;
 
     }

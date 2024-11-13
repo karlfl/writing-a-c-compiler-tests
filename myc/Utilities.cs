@@ -4,13 +4,14 @@ namespace myc
 {
     public static class Utilities
     {
-        internal static void RunGCCPreprocessor(string fileName)
+        internal static string RunGCCPreprocessor(string filePath)
         {
-            string cmd = string.Format("-E -P {0} -o {1}.prep", fileName, fileName.Split('.')[0]);
+            string cmd = string.Format("-E -P {0} -o {1}.prep", filePath, filePath.Split('.')[0]);
             RunGccCommand(cmd);
+            return string.Format("{0}.prep",filePath.Split('.')[0]);
         }
 
-        internal static void CleanUpGCCPreprocessor(string filePath)
+        internal static void GCCPreprocessorCleanUp(string filePath)
         {
             string prepFilePath = filePath.Split('.')[0] + ".prep";
             DeleteFile(prepFilePath);
@@ -22,12 +23,12 @@ namespace myc
             RunGccCommand(cmd);
         }
 
-        internal static void AssembleAndLink(string fileName)
+        internal static void AssembleAndLink(string filePath)
         {
-            string cmd = string.Format("{0}.s -o {1}", fileName.Split('.')[0], fileName.Split('.')[0]);
+            string cmd = string.Format("{0}.s -o {1}", filePath.Split('.')[0], filePath.Split('.')[0]);
             RunGccCommand(cmd);
         }
-        internal static void CleanUpAssembleAndLink(string filePath)
+        internal static void AssembleAndLinkCleanUp(string filePath)
         {
             string prepFilePath = filePath.Split('.')[0] + ".s";
             DeleteFile(prepFilePath);
