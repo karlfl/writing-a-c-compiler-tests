@@ -24,13 +24,23 @@ internal class Program
         // --codeGen = Run Lexer, Parser and Assembly Generator
         // --parser = Run Lexer and Parser
         // --lex = Run lexer
-        bool runCodeGen = args.Contains("--codeGen");
-        bool runParser  = args.Contains("--parse")    || runCodeGen;
-        bool runLexer   = args.Contains("--lex")      || runCodeGen || runParser;
+        bool runThruCodeGen = args.Contains("--codeGen");
+        bool runThruParser  = args.Contains("--parse")    || runThruCodeGen;
+        bool runThruLexer   = args.Contains("--lex")      || runThruCodeGen || runThruParser;
 
-        string programFile = args[0];
+        string programFile = args[^1];
 
-        MyCompiler.Compile(programFile, runLexer, runParser, runCodeGen);
+        try
+        {
+            MyCompiler.Compile(programFile, runThruLexer, runThruParser, runThruCodeGen);           
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine("Error Found: {0}",ex.Message);
+            return -1;
+        }
+
+
         return 0;
 
     }

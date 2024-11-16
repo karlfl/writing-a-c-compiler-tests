@@ -7,37 +7,6 @@ using System.Xml.XPath;
 
 namespace myc
 {
-
-    public class TokenDef(string name, string matchString, Func<string, string> converter)
-    {
-        public readonly string Name = name;
-        public readonly Regex Regex = new(matchString);
-        public readonly Func<string, string> Converter = converter;
-    }
-
-    public class MatchDef(Group match, TokenDef matchingToken)
-    {
-        public readonly Group match = match;
-        public readonly TokenDef matchedToken = matchingToken;
-    }
-
-    public enum Tokens
-    {
-        //(* tokens with contents *)
-        Identifier,
-        Constant,
-        //(* Keywords *)
-        KWInt,
-        KWReturn,
-        KWVoid,
-        //(* punctuation *)
-        OpenParen,
-        CloseParen,
-        OpenBrace,
-        CloseBrace,
-        Semicolon
-    }
-
     public static class Lex
     {
 
@@ -47,11 +16,11 @@ namespace myc
         [
             new("Identifier",  @"^[a-zA-Z_]\w*\b",  ConvertIdentifier),
             new("Constant",    @"^[0-9]+\b",        ConvertInt),
-            new("OpenParen",   @"^\(",              (name)=>Tokens.OpenParen.ToString()),
-            new("CloseParen",  @"^\)",              (name)=>Tokens.CloseParen.ToString()),
-            new("OpenBrace",   @"^{",               (name)=>Tokens.OpenBrace.ToString()),
-            new("CloseBrace",  @"^}",               (name)=>Tokens.CloseBrace.ToString()),
-            new("Semicolon",   @"^;",               (name)=>Tokens.Semicolon.ToString()),
+            new("OpenParen",   @"^\(",              (name)=>TokensEnum.OpenParen.ToString()),
+            new("CloseParen",  @"^\)",              (name)=>TokensEnum.CloseParen.ToString()),
+            new("OpenBrace",   @"^{",               (name)=>TokensEnum.OpenBrace.ToString()),
+            new("CloseBrace",  @"^}",               (name)=>TokensEnum.CloseBrace.ToString()),
+            new("Semicolon",   @"^;",               (name)=>TokensEnum.Semicolon.ToString()),
         ];
 
 
@@ -61,21 +30,22 @@ namespace myc
             string sourceString = source;
             if (sourceString.Trim() == "")
             {
-                return "";
+                throw new Exception("Empty file, nothing to process");
             }
 
             while (sourceString != "")
             {
-                //Find all token matches
+                //Find all token matches for the current string
                 List<MatchDef> matches = FindAllMatches(sourceString);
 
-                //Find the longest match
-                MatchDef? longMatch = matches.MaxBy(m => m.match.Length);
-                if (longMatch is null)
-                {
-                    // Throw error
-                    return "";
-                }
+                //Find the longest match, if none found throw exception
+                MatchDef? longMatch = matches.MaxBy(m => m.match.Length) ?? throw new Exception("No token matches found");
+
+                // Console.WriteLine("longMatch.match.Value: {0}", longMatch.match.Value);
+                // Console.WriteLine("LongMatch.matchedToken {0}", longMatch.matchedToken.Name);
+
+                if(string.IsNullOrEmpty(longMatch.match.Value)){throw new Exception("Invalid Match Found");}
+
                 sourceTokens.AppendLine(longMatch.matchedToken.Converter(longMatch.match.Value) + ";");
 
                 // Console.WriteLine("Before: {0}", sourceString);
@@ -91,17 +61,17 @@ namespace myc
         {
             return name switch
             {
-                "int" => Tokens.KWInt.ToString(),
-                "return" => Tokens.KWReturn.ToString(),
-                "void" => Tokens.KWVoid.ToString(),
-                _ => string.Format("{0} \"{1}\"", Tokens.Identifier.ToString(), name),
+                "int" => TokensEnum.KWInt.ToString(),
+                "return" => TokensEnum.KWReturn.ToString(),
+                "void" => TokensEnum.KWVoid.ToString(),
+                _ => string.Format("{0} \"{1}\"", TokensEnum.Identifier.ToString(), name),
             };
         }
 
 
         internal static string ConvertInt(string value)
         {
-            return string.Format("{0} {1}", Tokens.Constant.ToString(), value);
+            return string.Format("{0} {1}", TokensEnum.Constant.ToString(), value);
         }
 
 

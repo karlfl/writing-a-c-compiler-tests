@@ -5,16 +5,16 @@ namespace myc
 {
     public class MyCompiler
     {
-        static bool RunLexer = false;   // Run lexer
-        static bool RunParser = false;  // Run Lexer and Parser
-        static bool RunCodeGen = false; // Run Lexer, Parser and Assembly Generator
+        static bool RunThruLexer = false;   // Run lexer then stop
+        static bool RunThruParser = false;  // Run Lexer and Parser then stop
+        static bool RunThruCodeGen = false; // Run Lexer, Parser and Assembly Generator then stop
 
 
-        internal static void Compile(string programFile, bool runLexer, bool runParser, bool runCodeGen)
+        internal static void Compile(string programFile, bool runThruLexer, bool runThruParser, bool runThruCodeGen)
         {
-            RunLexer = runLexer;
-            RunParser = runParser;
-            RunCodeGen = runCodeGen;
+            RunThruLexer = runThruLexer;
+            RunThruParser = runThruParser;
+            RunThruCodeGen = runThruCodeGen;
 
             Console.WriteLine("\nProgram File: {0}\n", programFile);
 
@@ -27,10 +27,11 @@ namespace myc
             //Utilities.GCCCompile(programFile);
             Compile(prepFilePath);
 
-            //cleanup preprocessor file
+            //always cleanup preprocessor file
             Utilities.GCCPreprocessorCleanUp(programFile);
 
-            if (RunCodeGen)
+            //Assemble/Link only if no cmd line parms
+            if (!RunThruLexer && !RunThruParser && !RunThruCodeGen)
             {
                 //Assemble and Link
                 Console.WriteLine("Assemble and Link");
@@ -50,12 +51,14 @@ namespace myc
 
             if (source != null)
             {
-                if (RunLexer)
-                {
-                    tokens = Lex.Process(source);
-                    Console.WriteLine("\n{0}",tokens);
+                tokens = Lex.Process(source);
+                Console.WriteLine("\n{0}", tokens);
 
-                }
+                //If only running Lexer then step out now
+                if (RunThruLexer) return;
+
+                
+
             }
         }
 
