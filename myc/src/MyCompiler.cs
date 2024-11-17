@@ -1,6 +1,3 @@
-using System.Diagnostics.Tracing;
-using System.Reflection.Metadata.Ecma335;
-
 namespace myc
 {
     public class MyCompiler
@@ -52,12 +49,18 @@ namespace myc
             if (source != null)
             {
                 tokens = Lex.Process(source);
+
                 Console.WriteLine("\n{0}", tokens);
 
                 //If only running Lexer then step out now
                 if (RunThruLexer) return;
 
-                
+                string ast = Parse.Process(tokens);
+
+                Console.WriteLine("\n{0}",ast);
+
+                // If Only running Lexer and Parser then step out now
+                if (RunThruParser) return;
 
             }
         }

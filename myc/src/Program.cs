@@ -25,8 +25,8 @@ internal class Program
         // --parser = Run Lexer and Parser
         // --lex = Run lexer
         bool runThruCodeGen = args.Contains("--codeGen");
-        bool runThruParser  = args.Contains("--parse")    || runThruCodeGen;
-        bool runThruLexer   = args.Contains("--lex")      || runThruCodeGen || runThruParser;
+        bool runThruParser  = args.Contains("--parse");
+        bool runThruLexer   = args.Contains("--lex");
 
         string programFile = args[^1];
 
@@ -39,7 +39,6 @@ internal class Program
             Console.WriteLine("Error Found: {0}",ex.Message);
             return -1;
         }
-
 
         return 0;
 
