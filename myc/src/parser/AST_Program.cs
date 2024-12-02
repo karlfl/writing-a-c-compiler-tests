@@ -7,16 +7,16 @@ namespace myc
     public class AST_Program : AST_Base
     {
 
-        readonly AST_Function function;
+        public readonly AST_Function Function;
 
         public AST_Program(StringReader tokenStream) : base(tokenStream)
         {
-            function = new(tokenStream);
+            Function = new(tokenStream);
         }
 
         public override void Parse()
         {
-            function.Parse();
+            Function.Parse();
 
             try
             {
@@ -33,7 +33,7 @@ namespace myc
         {
             StringBuilder output = new();
             output.AppendLine("Program(");
-            output.AppendLine(function.Print());
+            output.AppendLine(Function.Print());
             output.AppendLine(")");
             return output.ToString();
         }

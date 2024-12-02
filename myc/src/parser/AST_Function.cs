@@ -2,7 +2,7 @@ using System.Text;
 
 namespace myc
 {
-    internal class AST_Function : AST_Base
+    public class AST_Function : AST_Base
     {
         readonly AST_Identifier identifier;
         readonly AST_Statement statement;
