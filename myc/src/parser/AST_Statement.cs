@@ -24,8 +24,8 @@ namespace myc
         {
             StringBuilder output = new();
             output.AppendLine("Return(");
-            output.AppendLine(string.Format("\t\t\tConstant({0})",this.expression.Print()));
-            output.AppendLine("\t\t)");
+            output.AppendLine(string.Format("            Constant({0})",this.expression.Print()));
+            output.AppendLine("        )");
             return output.ToString();
         }
     }

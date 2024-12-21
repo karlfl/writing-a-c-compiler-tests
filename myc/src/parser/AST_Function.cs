@@ -28,11 +28,11 @@ namespace myc
         public override string Print()
         {
             StringBuilder output = new();
-            output.AppendLine("\tFunction(");
-            output.AppendLine(string.Format("\t\tname=\"{0}\",", this.identifier.Print()));
+            output.AppendLine("    Function(");
+            output.AppendLine(string.Format("        name=\"{0}\",", this.identifier.Print()));
             string body = this.statement.Print();
-            output.AppendLine(string.Format("\t\tbody={0}", body));
-            output.AppendLine("\t)");
+            output.AppendLine(string.Format("        body={0}", body));
+            output.AppendLine("    )");
             return output.ToString();
         }
     }
