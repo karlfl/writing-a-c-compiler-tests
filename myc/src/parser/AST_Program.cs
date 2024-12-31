@@ -9,27 +9,13 @@ namespace myc
 
         public readonly AST_Function Function;
 
-        public AST_Program(StringReader tokenStream) : base(tokenStream)
+        public AST_Program(AST_Function function)
         {
-            Function = new(tokenStream);
+            Function = function;
         }
 
-        public override void Parse()
-        {
-            Function.Parse();
 
-            try
-            {
-                string token = GetNextToken();
-                throw new Exception("Unexpected tokens after function definition");
-            }
-            catch (EndOfStreamException)
-            {
-                //We expect an exception here and can ignore it.
-            }
-        }
-
-        public override string Print()
+        public string Print()
         {
             StringBuilder output = new();
             output.AppendLine("Program(");

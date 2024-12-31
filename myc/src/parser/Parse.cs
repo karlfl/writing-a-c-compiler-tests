@@ -2,14 +2,19 @@ namespace myc
 {
     public static class Parse
     {
-
-        public static string Process(string lexTokens)
+        public static AST_Program Process(string lexTokens)
         {
-            //Always start with a program node
-            AST_Program program = new(new StringReader(lexTokens));
-            program.Parse();
+            AST_Parse parser = new (new StringReader(lexTokens));
 
-            return program.Print();
+            return parser.Parse();
+        }
+
+        public static string Print(AST_Program program)
+        {
+            if (program != null)
+                return program.Print();
+            else
+                return "";
         }
     }
 }

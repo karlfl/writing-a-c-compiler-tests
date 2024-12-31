@@ -4,33 +4,21 @@ namespace myc
 {
     public class AST_Function : AST_Base
     {
-        readonly AST_Identifier identifier;
-        readonly AST_Statement statement;
+        public readonly AST_Identifier Identifier;
+        public readonly List<AST_Statement> Statements = [];
 
-        public AST_Function(StringReader tokenStream) : base(tokenStream)
+        public AST_Function(AST_Identifier identifier, AST_Statement statement)
         {
-            this.identifier = new(tokenStream);
-            this.statement = new(tokenStream);
+            this.Identifier = identifier;
+            this.Statements.Add(statement);
         }
 
-        public override void Parse()
-        {
-            Expect(TokensEnum.KWInt);
-            this.identifier.Parse();
-            Expect(TokensEnum.OpenParen);
-            Expect(TokensEnum.KWVoid);
-            Expect(TokensEnum.CloseParen);
-            Expect(TokensEnum.OpenBrace);
-            this.statement.Parse();
-            Expect(TokensEnum.CloseBrace);
-        }
-
-        public override string Print()
+        public string Print()
         {
             StringBuilder output = new();
             output.AppendLine("    Function(");
-            output.AppendLine(string.Format("        name=\"{0}\",", this.identifier.Print()));
-            string body = this.statement.Print();
+            output.AppendLine(string.Format("        name=\"{0}\",", this.Identifier.Print()));
+            string body = this.Statements[0].Print();
             output.AppendLine(string.Format("        body={0}", body));
             output.AppendLine("    )");
             return output.ToString();

@@ -1,30 +1,24 @@
-
-
 using System.Text;
 
 namespace myc
 {
     public class AST_Statement : AST_Base
     {
-        AST_Expression expression;
+        public readonly TokensEnum Instruction;
+        public readonly AST_Expression Expression;
 
 
-        public AST_Statement(StringReader tokenStream) : base(tokenStream)
+        public AST_Statement(TokensEnum instruction, AST_Expression expression)
         {
-            this.expression = new(tokenStream);
+            this.Instruction = instruction;
+            this.Expression = expression;
         }
 
-        public override void Parse(){
-            Expect(TokensEnum.KWReturn);
-            this.expression.Parse();
-            Expect(TokensEnum.Semicolon);
-        }
-
-        public override string Print()
+        public string Print()
         {
             StringBuilder output = new();
             output.AppendLine("Return(");
-            output.AppendLine(string.Format("            Constant({0})",this.expression.Print()));
+            output.AppendLine(string.Format("            Constant({0})",this.Expression.Print()));
             output.AppendLine("        )");
             return output.ToString();
         }

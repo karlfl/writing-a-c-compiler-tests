@@ -2,30 +2,15 @@
 namespace myc {
     public class AST_Identifier : AST_Base
     {
-        string name;
-        public AST_Identifier(StringReader tokenStream) : base(tokenStream)
+        public readonly string Name;
+        public AST_Identifier(string name)
         {
-            this.name = "";
+            this.Name = name;
         }
 
-        public override void Parse()
+        public string Print()
         {
-            string token = GetNextToken();
-            string[] ident = token.Split(" ");
-            if (
-                ident.Length != 2 ||
-                ident[0] != TokensEnum.Identifier.ToString()
-               )
-            {
-                throw new Exception("Invalid Indentifier Token");
-            };
-            this.name = ident[1].Replace("\"","");
-           
-        }
-
-        public override string Print()
-        {
-            return this.name;
+            return this.Name;
         }
     }
 }

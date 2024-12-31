@@ -55,13 +55,19 @@ namespace myc
                 //If only running Lexer then step out now
                 if (RunThruLexer) return;
 
-                string ast = Parse.Process(tokens);
-
-                Console.WriteLine("\n{0}",ast);
+                AST_Program ast = Parse.Process(tokens);
+                Console.WriteLine("\n{0}",ast.Print());
 
                 // If Only running Lexer and Parser then step out now
                 if (RunThruParser) return;
 
+                ASM_Program asm_ast = CodeGen.Generate(ast);
+                // Console.WriteLine("\n{0}",asm_ast);
+
+                // If Only running Lexer, Parser and CodeGen then step out now
+                if (RunThruCodeGen) return;
+
+                CodeEmit.Emit(asm_ast, programFile);
             }
         }
 
