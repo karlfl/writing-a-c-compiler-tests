@@ -23,7 +23,7 @@ namespace myc
             switch (statement.Instruction)
             {
                 case TokensEnum.KWReturn:
-                    ASM_Operand value = ConvertExpression_Int(statement.Expression);
+                    ASM_Operand value = ConvertExpression(statement.Expression);
                     instructions.Add(new ASM_Mov(value, new ASM_Register()));
                     instructions.Add(new ASM_Ret());
                     break;
@@ -34,8 +34,15 @@ namespace myc
             return instructions;
         }
 
-        private static ASM_Operand ConvertExpression_Int (AST_Expression expression) {
-            return new ASM_Imm(expression.Value);
+        private static ASM_Operand ConvertExpression (AST_Expression expression) {
+            switch (expression)
+            {
+                case AST_Constant cnst:
+                    return new ASM_Imm(cnst.Value);
+
+                default:
+                    throw new ArgumentException("Unexpected AST Expression Type");
+            }
         }
 
     }

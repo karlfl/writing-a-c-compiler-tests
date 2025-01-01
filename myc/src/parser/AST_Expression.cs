@@ -1,16 +1,41 @@
-namespace myc {
-    public class AST_Expression : AST_Base
+namespace myc
+{
+    public abstract class AST_Expression : AST_Base
+    {
+        public abstract string Print();
+    }
+
+    public class AST_Constant : AST_Expression
     {
         public readonly int Value;
 
-        public AST_Expression(int value)
+        public AST_Constant(int value)
         {
             this.Value = value;
         }
 
-        public string Print()
+        public override string Print()
         {
-            return string.Format("{0}",this.Value);
+            return string.Format("{0}", this.Value);
         }
     }
+    
+    public class AST_Unary : AST_Expression
+    {
+        AST_UnaryOp UnaryOp;
+        AST_Expression Expression;
+
+        public AST_Unary(AST_UnaryOp unOp, AST_Expression exp)
+        {
+            this.UnaryOp = unOp;
+            this.Expression = exp;
+        }
+
+        public override string Print()
+        {
+            return string.Format("{0}({1})", UnaryOp.Print(), Expression.Print());
+        }
+
+    }
+
 }

@@ -17,7 +17,10 @@ namespace myc
             new("OpenBrace",   @"^{",               (name)=>TokensEnum.OpenBrace.ToString()),
             new("CloseBrace",  @"^}",               (name)=>TokensEnum.CloseBrace.ToString()),
             new("Semicolon",   @"^;",               (name)=>TokensEnum.Semicolon.ToString()),
-        ];
+            new("Complement",  @"^~",               (name)=>TokensEnum.Tilde.ToString()),
+            new("Negation",    @"^-",               (name)=>TokensEnum.Hyphen.ToString()),
+            new("Decrement",   @"^--",              (name)=>TokensEnum.Decrement.ToString()),
+       ];
 
 
         public static string Process(string source)
@@ -40,7 +43,7 @@ namespace myc
                 // Console.WriteLine("longMatch.match.Value: {0}", longMatch.match.Value);
                 // Console.WriteLine("LongMatch.matchedToken {0}", longMatch.matchedToken.Name);
 
-                if(string.IsNullOrEmpty(longMatch.match.Value)){throw new Exception("Invalid Match Found");}
+                if(string.IsNullOrEmpty(longMatch.match.Value)){ throw new Exception(String.Format("Invalid Match Found '{0}'", longMatch.match.Value)); }
 
                 sourceTokens.AppendLine(longMatch.matchedToken.Converter(longMatch.match.Value) + ";");
 

@@ -94,18 +94,40 @@ namespace myc
         public AST_Expression Parse_Expression()
         {
             string? token = GetNextToken();
-            string[] expr = token.Split(' ');
-            if (
-                expr.Length != 2 ||
-                expr[0] != TokensEnum.Constant.ToString()
-               )
-            {
-                throw new Exception("Invalid Expression Token");
-            };
+            string[] tokenParts = token.Split(' ');
 
-            //Parse as integer
-            int value = int.Parse(expr[1]);
-            return new(value);
+            _ = Enum.TryParse(tokenParts[0], out TokensEnum keytoken);
+
+            switch (keytoken)
+            {
+                case TokensEnum.Constant:
+                    if(tokenParts.Length != 2) {throw new Exception("Invalid Expression - Constant missing value");}
+                    int intValue = int.Parse(tokenParts[1]);
+                    return new AST_Constant(intValue);
+                case TokensEnum.Tilde:
+                case TokensEnum.Hyphen:
+                    AST_UnaryOp unOp =  Parse_UnaryOp(keytoken, tokenParts);
+                    AST_Expression unExp = Parse_Expression();
+                    return new AST_Unary(unOp, unExp);  
+                case TokensEnum.OpenParen:
+                    AST_Expression innerExp = Parse_Expression();
+                    Expect(TokensEnum.CloseParen);
+                    return innerExp;             
+                default:
+                    throw new Exception(string.Format("Invalid Expression Token: {0}", token));
+
+            }
+        }
+
+        public AST_UnaryOp Parse_UnaryOp(TokensEnum keyToken, string[] tokens) {
+            switch(keyToken) {
+                case TokensEnum.Tilde:
+                    return new AST_Complement();
+                 case TokensEnum.Hyphen:
+                    return new AST_Negate();
+                default:
+                    throw new Exception("Invalid Unary Op Token");
+           }
         }
 
 

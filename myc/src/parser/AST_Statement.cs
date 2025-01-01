@@ -18,7 +18,7 @@ namespace myc
         {
             StringBuilder output = new();
             output.AppendLine("Return(");
-            output.AppendLine(string.Format("            Constant({0})",this.Expression.Print()));
+            output.AppendLine(string.Format("            {0}",this.Expression.Print()));
             output.AppendLine("        )");
             return output.ToString();
         }

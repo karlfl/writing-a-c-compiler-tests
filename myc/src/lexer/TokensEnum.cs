@@ -9,6 +9,10 @@ namespace myc
         KWInt,
         KWReturn,
         KWVoid,
+        //(* Operators *)
+        Tilde,
+        Hyphen,
+        Decrement,
         //(* punctuation *)
         OpenParen,
         CloseParen,
