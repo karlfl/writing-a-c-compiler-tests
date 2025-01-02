@@ -32,36 +32,22 @@ namespace myc
                 case AST_Int constant:
                     return ([], new TAC_Constant(constant.Value));
                 case AST_Unary unary:
-                    var (innerUnaryInstr, unarySrc) = EmitForExpression(unary.Factor);
-                    TAC_Variable dst = new(Utilities.GenerateUniqueId());
-                    TAC_UnaryOp unaryOp = ConvertUnaryOp(unary.UnaryOp);
-                    innerUnaryInstr.Add(new TAC_Unary(unaryOp, unarySrc, dst));
-                    return (innerUnaryInstr, dst);
+                    return EmitUnary(unary);
                 case AST_Binary binary:
-                    var (innerBinaryInstr, binarySrc1) = EmitForExpression(binary.LeftFactor);
-                    var (innerBinaryInstr2, binarySrc2) = EmitForExpression(binary.RightFactor);
-                    innerBinaryInstr.AddRange(innerBinaryInstr2);
-                    TAC_Variable binaryDst = new(Utilities.GenerateUniqueId());
-                    TAC_BinaryOp binaryOp = ConvertBinaryOp(binary.BinaryOp);
-                    innerBinaryInstr.Add(new TAC_Binary(binaryOp, binarySrc1, binarySrc2, binaryDst));
-                    return (innerBinaryInstr, binaryDst);
-
+                    return EmitBinary(binary);
                 default:
                     throw new ArgumentException("TAC: Unexpected AST Expression type");
             }
 
-            static TAC_BinaryOp ConvertBinaryOp(AST_BinaryOp binaryOp)
-            {
-                return binaryOp switch
-                {
-                    AST_Add => new TAC_Add(),
-                    AST_Subtract => new TAC_Subtract(),
-                    AST_Multiply => new TAC_Multiply(),
-                    AST_Divide => new TAC_Divide(),
-                    AST_Mod => new TAC_Remainder(),
-                    _ => throw new ArgumentException("Unexpected AST Unary Operation"),
-                };
-            }
+        }
+
+        private static (List<TAC_Instruction> instructions, TAC_Value value) EmitUnary(AST_Unary unary)
+        {
+            var (innerUnaryInstr, unarySrc) = EmitForExpression(unary.Factor);
+            TAC_Variable dst = new(Utilities.GenerateUniqueId());
+            TAC_UnaryOp unaryOp = ConvertUnaryOp(unary.UnaryOp);
+            innerUnaryInstr.Add(new TAC_Unary(unaryOp, unarySrc, dst));
+            return (innerUnaryInstr, dst);
         }
 
         private static TAC_UnaryOp ConvertUnaryOp(AST_UnaryOp unaryOp)
@@ -71,6 +57,30 @@ namespace myc
                 AST_Complement => new TAC_Complement(),
                 AST_Negate => new TAC_Negate(),
                 _ => throw new ArgumentException("Unexpected AST Unary Operation"),
+            };
+        }
+
+        private static (List<TAC_Instruction> instructions, TAC_Value value) EmitBinary(AST_Binary binary)
+        {
+            var (innerBinaryInstr, binarySrc1) = EmitForExpression(binary.LeftFactor);
+            var (innerBinaryInstr2, binarySrc2) = EmitForExpression(binary.RightFactor);
+            innerBinaryInstr.AddRange(innerBinaryInstr2);
+            TAC_Variable binaryDst = new(Utilities.GenerateUniqueId());
+            TAC_BinaryOp binaryOp = ConvertBinaryOp(binary.BinaryOp);
+            innerBinaryInstr.Add(new TAC_Binary(binaryOp, binarySrc1, binarySrc2, binaryDst));
+            return (innerBinaryInstr, binaryDst);
+        }
+
+        private static TAC_BinaryOp ConvertBinaryOp(AST_BinaryOp binaryOp)
+        {
+            return binaryOp switch
+            {
+                AST_Add => new TAC_Add(),
+                AST_Subtract => new TAC_Subtract(),
+                AST_Multiply => new TAC_Multiply(),
+                AST_Divide => new TAC_Divide(),
+                AST_Mod => new TAC_Remainder(),
+                _ => throw new ArgumentException("Unexpected AST Binary Operation"),
             };
         }
     }
