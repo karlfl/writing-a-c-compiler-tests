@@ -1,23 +1,18 @@
 namespace myc
 {
-    public class MyCompiler
+    public class MyCompiler(Settings settings)
     {
-        static bool RunThruLexer = false;   // Run lexer then stop
-        static bool RunThruParser = false;  // Run Lexer and Parser then stop
-        static bool RunThruCodeGen = false; // Run Lexer, Parser and Assembly Generator then stop
+        Settings mySettings = settings;
 
-
-        internal static void Compile(string programFile, bool runThruLexer, bool runThruParser, bool runThruCodeGen)
+        public void Compile(Settings settings)
         {
-            RunThruLexer = runThruLexer;
-            RunThruParser = runThruParser;
-            RunThruCodeGen = runThruCodeGen;
+            mySettings = settings;
 
-            Console.WriteLine("\nProgram File: {0}\n", programFile);
+            Console.WriteLine("\nProgram File: {0}\n", mySettings.ProgramFile);
 
 
             Console.WriteLine("Preprocess");
-            string prepFilePath = Utilities.RunGCCPreprocessor(programFile);
+            string prepFilePath = Utilities.RunGCCPreprocessor(mySettings.ProgramFile);
 
             //Compile
             Console.WriteLine("Compile");
@@ -25,23 +20,23 @@ namespace myc
             Compile(prepFilePath);
 
             //always cleanup preprocessor file
-            Utilities.GCCPreprocessorCleanUp(programFile);
+            Utilities.GCCPreprocessorCleanUp(mySettings.ProgramFile);
 
             //Assemble/Link only if no cmd line parms
-            if (!RunThruLexer && !RunThruParser && !RunThruCodeGen)
+            if (mySettings.RunAssembleLink)
             {
                 //Assemble and Link
                 Console.WriteLine("Assemble and Link");
-                Utilities.AssembleAndLink(programFile);
+                Utilities.AssembleAndLink(mySettings.ProgramFile);
 
                 //cleanup asm file
-                Utilities.AssembleAndLinkCleanUp(programFile);
+                Utilities.AssembleAndLinkCleanUp(mySettings.ProgramFile);
             }
 
             Console.WriteLine("\nComplete\n");
         }
 
-        internal static void Compile(string programFile)
+        internal void Compile(string programFile)
         {
             string? source = ReadFile(programFile);
             string tokens;
@@ -53,19 +48,32 @@ namespace myc
                 Console.WriteLine("\n{0}", tokens);
 
                 //If only running Lexer then step out now
-                if (RunThruLexer) return;
+                if (mySettings.RunThruLexer) return;
 
                 AST_Program ast = Parse.Process(tokens);
                 Console.WriteLine("\n{0}",ast.Print());
 
                 // If Only running Lexer and Parser then step out now
-                if (RunThruParser) return;
+                if (mySettings.RunThruParser) return;
 
-                ASM_Program asm_ast = CodeGen.Generate(ast);
+                TAC_Program tac_ast = TACGen.Generate(ast);
+                Console.WriteLine("\n{0}",tac_ast.Print());
+
+                // If Only running Lexer, Parser, CodeGen and TAC then step out now
+                if (mySettings.RunThruTac) return;
+
+                // Assembly generation has three steps
+                // 1. Convert TACto assembly 
+                ASM_Program asm_ast = CodeGen.Generate(tac_ast);
+                // 2. Replace pseudo registers with stack operands
+                int lastStackSlot = ReplacePseudos.Replace(asm_ast);
+                // 3. Fixup instructions
+                FixInstructions.Fix(asm_ast, lastStackSlot);
+
                 // Console.WriteLine("\n{0}",asm_ast);
 
                 // If Only running Lexer, Parser and CodeGen then step out now
-                if (RunThruCodeGen) return;
+                if (mySettings.RunThruCodeGen) return;
 
                 CodeEmit.Emit(asm_ast, programFile);
             }
@@ -73,7 +81,6 @@ namespace myc
 
         internal static string? ReadFile(string filePath)
         {
-            string prepFilePath = filePath.Split('.')[0] + ".prep";
             try
             {
                 // Open the text file using a stream reader.

@@ -21,10 +21,12 @@ internal class Program
         }
 
         // Check for arg flags
-        // --codeGen = Run Lexer, Parser and Assembly Generator
+        // --codeGen = Run Lexer, Parser, Tacky and Assembly Generator
+        // --tacky = Run lexer, parser, Tacky
         // --parser = Run Lexer and Parser
         // --lex = Run lexer
-        bool runThruCodeGen = args.Contains("--codeGen");
+        bool runThruCodeGen = args.Contains("--codegen");
+        bool runThruTac     = args.Contains("--tacky");
         bool runThruParser  = args.Contains("--parse");
         bool runThruLexer   = args.Contains("--lex");
 
@@ -32,8 +34,11 @@ internal class Program
 
         try
         {
-            MyCompiler.Compile(programFile, runThruLexer, runThruParser, runThruCodeGen);           
+            Settings settings = new (programFile, runThruCodeGen, runThruParser, runThruLexer, runThruTac);
+            MyCompiler compiler = new(settings);
+            compiler.Compile(settings);           
         }
+
         catch (System.Exception ex)
         {
             Console.WriteLine("Error Found: {0}",ex.Message);

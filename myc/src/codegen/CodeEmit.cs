@@ -1,6 +1,3 @@
-
-using System.Runtime.Serialization;
-
 namespace myc
 {
     public static class CodeEmit
@@ -19,7 +16,10 @@ namespace myc
             string label = "" + function.Name; //Linux
             writer.WriteLine("\t.globl {0}", label);
             writer.WriteLine("{0}:", label);
-            foreach (ASM_Instruction instr in function.Body)
+            writer.WriteLine("\tpushq \t%rbp");
+            writer.WriteLine("\tmovq  \t%rsp, %rbp");
+
+            foreach (ASM_Instruction instr in function.Instructions)
             {
                 EmitInstruction(writer, instr);
             }
@@ -35,9 +35,18 @@ namespace myc
                     writer.WriteLine("\tmovl \t{0}, {1}", src, dst);
                     break;
                 case ASM_Ret inst:
+                    writer.WriteLine("\tmovq \t%rbp, %rsp");
+                    writer.WriteLine("\tpopq \t%rbp");
                     writer.WriteLine("\tret");
                     break;
-
+                case ASM_Unary unary:
+                    string unaryOp = ConvertUnaryOp(unary.UnaryOp);
+                    string operand = ConvertOperand(unary.Operand);
+                    writer.WriteLine("\t{0} \t{1}", unaryOp, operand);
+                    break;
+                case ASM_AllocateStack stack:
+                    writer.WriteLine("\tsubq \t${0}, %rsp", stack.Size);
+                    break;
                 default:
                     return;
             }
@@ -46,15 +55,28 @@ namespace myc
 
         private static string ConvertOperand(ASM_Operand operand)
         {
-            switch (operand)
+            return operand switch
             {
-                case ASM_Register:
-                    return "%eax";
-                case ASM_Imm imm:
-                    return string.Format("${0}", imm.Value);
-                default:
-                    throw new InvalidOperationException("Operand Not Defined for Conversion: {0}");
-            }
+                ASM_Register register => register.Register switch
+                {
+                    ASM_AX => "%eax",
+                    ASM_R10 => "%r10d",
+                    _ => throw new InvalidOperationException("Register Not Defined for Conversion: {0}"),
+                },
+                ASM_Stack stack => string.Format("{0}(%rbp)", stack.Stack),
+                ASM_Imm imm => string.Format("${0}", imm.Value),
+                _ => throw new InvalidOperationException("Operand Not Defined for Conversion: {0}"),
+            };
+        }
+
+        private static string ConvertUnaryOp(ASM_UnaryOp operand)
+        {
+            return operand switch
+            {
+                ASM_UnaryNeg => "negl",
+                ASM_UnaryNot => "notl",
+                _ => throw new InvalidOperationException("Unary Operand Not Defined for Conversion: {0}"),
+            };
         }
 
         private static void EmitStackNote(StreamWriter writer)

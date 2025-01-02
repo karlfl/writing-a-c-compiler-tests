@@ -22,8 +22,8 @@ namespace myc
     
     public class AST_Unary : AST_Expression
     {
-        AST_UnaryOp UnaryOp;
-        AST_Expression Expression;
+        public readonly AST_UnaryOp UnaryOp;
+        public readonly AST_Expression Expression;
 
         public AST_Unary(AST_UnaryOp unOp, AST_Expression exp)
         {

@@ -4,6 +4,7 @@ namespace myc
 {
     public static class Utilities
     {
+        static int UniqueIdCounter = 0;
         internal static string RunGCCPreprocessor(string filePath)
         {
             string cmd = string.Format("-E -P {0} -o {1}.prep", filePath, filePath.Split('.')[0]);
@@ -75,5 +76,11 @@ namespace myc
             }
         }
 
+        public static string GenerateUniqueId(){
+            //* Note: including "." ensures that this label won't conflict
+            //* with real function or variable names in the symbol table,
+            //* when we start tracking symbols in later chapters
+            return string.Format("tmp.{0}", UniqueIdCounter++);
+        }
     }
 }
