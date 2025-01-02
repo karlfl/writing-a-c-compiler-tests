@@ -12,7 +12,11 @@ namespace myc
         //(* Operators *)
         Tilde,
         Hyphen,
-        Decrement,
+        DoubleHyphen,
+        Plus,
+        Asterisk,
+        ForwardSlasb,
+        Percent,
         //(* punctuation *)
         OpenParen,
         CloseParen,

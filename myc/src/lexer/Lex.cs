@@ -14,12 +14,17 @@ namespace myc
             new("Constant",    @"^[0-9]+\b",        ConvertInt),
             new("OpenParen",   @"^\(",              (name)=>TokensEnum.OpenParen.ToString()),
             new("CloseParen",  @"^\)",              (name)=>TokensEnum.CloseParen.ToString()),
-            new("OpenBrace",   @"^{",               (name)=>TokensEnum.OpenBrace.ToString()),
-            new("CloseBrace",  @"^}",               (name)=>TokensEnum.CloseBrace.ToString()),
+            new("OpenBrace",   @"^\{",              (name)=>TokensEnum.OpenBrace.ToString()),
+            new("CloseBrace",  @"^\}",              (name)=>TokensEnum.CloseBrace.ToString()),
             new("Semicolon",   @"^;",               (name)=>TokensEnum.Semicolon.ToString()),
             new("Complement",  @"^~",               (name)=>TokensEnum.Tilde.ToString()),
             new("Negation",    @"^-",               (name)=>TokensEnum.Hyphen.ToString()),
-            new("Decrement",   @"^--",              (name)=>TokensEnum.Decrement.ToString()),
+            new("Decrement",   @"^--",              (name)=>TokensEnum.DoubleHyphen.ToString()),
+            new("Add",         @"^\+",              (name)=>TokensEnum.Plus.ToString()),
+            new("Multiply",    @"^\*",              (name)=>TokensEnum.Asterisk.ToString()),
+            new("Divide",      @"^/",               (name)=>TokensEnum.ForwardSlasb.ToString()),
+            new("Remainder",   @"^%",               (name)=>TokensEnum.Percent.ToString()),
+
        ];
 
 
