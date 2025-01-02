@@ -22,7 +22,7 @@ namespace myc
             new("Decrement",   @"^--",              (name)=>TokensEnum.DoubleHyphen.ToString()),
             new("Add",         @"^\+",              (name)=>TokensEnum.Plus.ToString()),
             new("Multiply",    @"^\*",              (name)=>TokensEnum.Asterisk.ToString()),
-            new("Divide",      @"^/",               (name)=>TokensEnum.ForwardSlasb.ToString()),
+            new("Divide",      @"^/",               (name)=>TokensEnum.ForwardSlash.ToString()),
             new("Remainder",   @"^%",               (name)=>TokensEnum.Percent.ToString()),
 
        ];

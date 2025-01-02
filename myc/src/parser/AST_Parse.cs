@@ -1,25 +1,12 @@
 namespace myc
 {
-    public class AST_Parse
+    public class AST_Parse(StringReader tokenStream)
     {
-        public readonly StringReader TokenStream;
-
-        public AST_Parse(StringReader tokenStream)
-        {
-            TokenStream = tokenStream;
-        }
-
-        protected string GetNextToken()
-        {
-            string token = this.TokenStream.ReadLine() ??
-                throw new EndOfStreamException("Unexpected End of File");
-            // Remove the end token ';' if there is one
-            return token.Replace(";", "");
-        }
+        public readonly TokenStream TokenStream = new(tokenStream);
 
         protected void Expect(TokensEnum expected)
         {
-            string actual = GetNextToken();
+            string actual = TokenStream.Get_Token();
             if (actual != expected.ToString())
             {
                 throw new Exception(
@@ -40,7 +27,7 @@ namespace myc
 
             try
             {
-                string token = GetNextToken();
+                string token = TokenStream.Get_Token();
                 throw new Exception("Unexpected tokens after function definition");
             }
             catch (EndOfStreamException)
@@ -67,7 +54,7 @@ namespace myc
 
         public AST_Identifier Parse_Identifier()
         {
-            string token = GetNextToken();
+            string token = TokenStream.Get_Token();
             string[] ident = token.Split(" ");
             if (
                 ident.Length != 2 ||
@@ -85,51 +72,141 @@ namespace myc
         public AST_Statement Parse_Statement()
         {
             Expect(TokensEnum.KWReturn);
-            AST_Expression expr = Parse_Expression();
+            AST_Factor expr = Parse_Expression(0);
             Expect(TokensEnum.Semicolon);
 
             return new(TokensEnum.KWReturn, expr);
         }
 
-        public AST_Expression Parse_Expression()
+        public AST_Factor Parse_Expression(int minPrecedence)
         {
-            string? token = GetNextToken();
-            string[] tokenParts = token.Split(' ');
+            AST_Factor leftFactor = Parse_Factor();
 
-            _ = Enum.TryParse(tokenParts[0], out TokensEnum keytoken);
+            TokensEnum nextToken = TokenStream.Peek_TokenEnum();
 
-            switch (keytoken)
+            // Parse expression loop
+            while (
+                IsBinaryOp(nextToken) &&
+                GetPrecedence(nextToken) >= minPrecedence)
+            {
+                AST_BinaryOp oper = Parse_BinaryOp();
+                AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken) + 1);
+
+                leftFactor = new AST_Binary(leftFactor, oper, rightFactor);
+
+                //Peek to see what the next token is
+                nextToken = TokenStream.Peek_TokenEnum();
+            }
+
+            return leftFactor;
+        }
+
+        public AST_Factor Parse_Factor()
+        {
+            TokensEnum keyToken = TokenStream.Peek_TokenEnum();
+
+            switch (keyToken)
             {
                 case TokensEnum.Constant:
-                    if(tokenParts.Length != 2) {throw new Exception("Invalid Expression - Constant missing value");}
-                    int intValue = int.Parse(tokenParts[1]);
-                    return new AST_Constant(intValue);
+                    return Parse_Constant();
                 case TokensEnum.Tilde:
                 case TokensEnum.Hyphen:
-                    AST_UnaryOp unOp =  Parse_UnaryOp(keytoken, tokenParts);
-                    AST_Expression unExp = Parse_Expression();
-                    return new AST_Unary(unOp, unExp);  
+                    AST_UnaryOp unOp = Parse_UnaryOp();
+                    AST_Factor unaryInnerExp = Parse_Factor();
+                    return new AST_Unary(unOp, unaryInnerExp);
                 case TokensEnum.OpenParen:
-                    AST_Expression innerExp = Parse_Expression();
+                    _ = TokenStream.Get_Token();  //consume the '('
+                    AST_Factor innerExp = Parse_Expression(0);
                     Expect(TokensEnum.CloseParen);
-                    return innerExp;             
+                    return innerExp;
                 default:
-                    throw new Exception(string.Format("Invalid Expression Token: {0}", token));
+                    throw new Exception(string.Format("Invalid Expression Token: {0}", keyToken));
 
             }
         }
 
-        public AST_UnaryOp Parse_UnaryOp(TokensEnum keyToken, string[] tokens) {
-            switch(keyToken) {
-                case TokensEnum.Tilde:
-                    return new AST_Complement();
-                 case TokensEnum.Hyphen:
-                    return new AST_Negate();
-                default:
-                    throw new Exception("Invalid Unary Op Token");
-           }
+        public AST_Int Parse_Constant()
+        {
+            string? token = TokenStream.Get_Token();
+            string[] tokenParts = token.Split(' ');
+
+            if (tokenParts.Length != 2)
+            {
+                throw new Exception("Invalid Expression - Constant missing value");
+            }
+
+            return new AST_Int(int.Parse(tokenParts[1]));
         }
 
+        public AST_UnaryOp Parse_UnaryOp()
+        {
+            string? token = TokenStream.Get_Token();
+            string[] tokenParts = token.Split(' ');
+
+            _ = Enum.TryParse(tokenParts[0], out TokensEnum keyToken);
+
+            return keyToken switch
+            {
+                TokensEnum.Tilde => new AST_Complement(),
+                TokensEnum.Hyphen => new AST_Negate(),
+                _ => throw new Exception("Invalid Unary Op Token"),
+            };
+        }
+
+
+        public AST_BinaryOp Parse_BinaryOp()
+        {
+            string? token = TokenStream.Get_Token();
+            string[] tokenParts = token.Split(' ');
+
+            _ = Enum.TryParse(tokenParts[0], out TokensEnum keyToken);
+
+            switch (keyToken)
+            {
+                case TokensEnum.Plus:
+                    return new AST_Add();
+                case TokensEnum.Hyphen:
+                    return new AST_Subtract();
+                case TokensEnum.Asterisk:
+                    return new AST_Multiply();
+                case TokensEnum.ForwardSlash:
+                    return new AST_Divide();
+                case TokensEnum.Percent:
+                    return new AST_Mod();
+                default:
+                    throw new Exception("Invalid Binary Op Token");
+            }
+        }
+
+        private bool IsBinaryOp(TokensEnum opToken)
+        {
+            return opToken switch
+            {
+                TokensEnum.Asterisk or
+                TokensEnum.ForwardSlash or
+                TokensEnum.Percent or
+                TokensEnum.Plus or
+                TokensEnum.Hyphen 
+                    => true,
+
+                _   => false,
+            };
+        }
+
+        private int GetPrecedence(TokensEnum opToken)
+        {
+            return opToken switch
+            {
+                TokensEnum.Asterisk or
+                TokensEnum.ForwardSlash or
+                TokensEnum.Percent => 50,
+
+                TokensEnum.Plus or
+                TokensEnum.Hyphen => 45,
+
+                _ => 0,
+            };
+        }
 
 
     }

@@ -5,10 +5,10 @@ namespace myc
     public class AST_Statement : AST_Base
     {
         public readonly TokensEnum Instruction;
-        public readonly AST_Expression Expression;
+        public readonly AST_Factor Expression;
 
 
-        public AST_Statement(TokensEnum instruction, AST_Expression expression)
+        public AST_Statement(TokensEnum instruction, AST_Factor expression)
         {
             this.Instruction = instruction;
             this.Expression = expression;

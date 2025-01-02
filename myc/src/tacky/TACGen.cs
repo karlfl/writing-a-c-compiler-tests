@@ -25,14 +25,14 @@ namespace myc
             return instructions;
         }
 
-        private static (List<TAC_Instruction> instructions, TAC_Value value) EmitForExpression(AST_Expression expression)
+        private static (List<TAC_Instruction> instructions, TAC_Value value) EmitForExpression(AST_Factor expression)
         {
             switch (expression)
             {
-                case AST_Constant constant:
+                case AST_Int constant:
                     return ([], new TAC_Constant(constant.Value));
                 case AST_Unary unary:
-                    var (innerInstr, src) = EmitForExpression(unary.Expression);
+                    var (innerInstr, src) = EmitForExpression(unary.Factor);
                     TAC_Variable dst = new(Utilities.GenerateUniqueId());
                     TAC_UnaryOp unaryOp = unary.UnaryOp switch
                     {

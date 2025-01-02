@@ -15,7 +15,7 @@ namespace myc
         DoubleHyphen,
         Plus,
         Asterisk,
-        ForwardSlasb,
+        ForwardSlash,
         Percent,
         //(* punctuation *)
         OpenParen,
