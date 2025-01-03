@@ -44,4 +44,68 @@ namespace myc
             return "%";
         }
     }
+
+    public class AST_LogicalAnd : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "&&";
+        }
+    }
+
+    public class AST_LogicalOr : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "||";
+        }
+    }
+
+    public class AST_Equal : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "=";
+        }
+    }
+
+    public class AST_NotEqual : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "!=";
+        }
+    }
+
+    public class AST_LessThan : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "<";
+        }
+    }
+
+    public class AST_GreaterThan : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return ">";
+        }
+    }
+
+    public class AST_LessOrEqual : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "<=";
+        }
+    }
+
+    public class AST_GreaterOrEqual : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return ">=";
+        }
+    }
 }

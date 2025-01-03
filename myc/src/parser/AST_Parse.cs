@@ -111,6 +111,7 @@ namespace myc
                     return Parse_Constant();
                 case TokensEnum.Tilde:
                 case TokensEnum.Hyphen:
+                case TokensEnum.LogicalNOT:
                     AST_UnaryOp unOp = Parse_UnaryOp();
                     AST_Factor unaryInnerExp = Parse_Factor();
                     return new AST_Unary(unOp, unaryInnerExp);
@@ -149,6 +150,7 @@ namespace myc
             {
                 TokensEnum.Tilde => new AST_Complement(),
                 TokensEnum.Hyphen => new AST_Negate(),
+                TokensEnum.LogicalNOT => new AST_Not(),
                 _ => throw new Exception("Invalid Unary Op Token"),
             };
         }
@@ -173,6 +175,23 @@ namespace myc
                     return new AST_Divide();
                 case TokensEnum.Percent:
                     return new AST_Mod();
+                case TokensEnum.LogicalAND:
+                    return new AST_LogicalAnd();
+                case TokensEnum.LogicalOR:
+                    return new AST_LogicalOr();
+                case TokensEnum.EqualEqual:
+                    return new AST_Equal();
+                case TokensEnum.NotEqual:
+                    return new AST_NotEqual();
+                case TokensEnum.LessThan:
+                    return new AST_LessThan();
+                case TokensEnum.GreaterThan:
+                    return new AST_GreaterThan();
+                case TokensEnum.LessOrEqual:
+                    return new AST_LessOrEqual();
+                case TokensEnum.GreaterOrEqual:
+                    return new AST_GreaterOrEqual();
+
                 default:
                     throw new Exception("Invalid Binary Op Token");
             }
@@ -186,10 +205,18 @@ namespace myc
                 TokensEnum.ForwardSlash or
                 TokensEnum.Percent or
                 TokensEnum.Plus or
-                TokensEnum.Hyphen 
+                TokensEnum.Hyphen or
+                TokensEnum.LessThan or
+                TokensEnum.GreaterThan or
+                TokensEnum.LessOrEqual or
+                TokensEnum.GreaterOrEqual or
+                TokensEnum.EqualEqual or
+                TokensEnum.NotEqual or
+                TokensEnum.LogicalAND or
+                TokensEnum.LogicalOR
                     => true,
 
-                _   => false,
+                _ => false,
             };
         }
 
@@ -203,6 +230,18 @@ namespace myc
 
                 TokensEnum.Plus or
                 TokensEnum.Hyphen => 45,
+
+                TokensEnum.LessThan or
+                TokensEnum.GreaterThan or
+                TokensEnum.LessOrEqual or
+                TokensEnum.GreaterOrEqual => 35,
+
+                TokensEnum.EqualEqual or
+                TokensEnum.NotEqual => 30,
+
+                TokensEnum.LogicalAND => 10,
+
+                TokensEnum.LogicalOR => 5,
 
                 _ => 0,
             };

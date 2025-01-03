@@ -23,4 +23,11 @@ namespace myc
             return "-";
         }
     }
-}
+
+    public class AST_Not : AST_UnaryOp
+    {
+        public override string Print()
+        {
+            return "!";
+        }
+    }}
