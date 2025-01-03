@@ -25,7 +25,7 @@ namespace myc
 
     public class ASM_Idiv(ASM_Operand operand) : ASM_Instruction
     {
-        public readonly ASM_Operand Operand1 = operand;
+        public readonly ASM_Operand Operand = operand;
     }
 
     public class ASM_Cdq() : ASM_Instruction{}

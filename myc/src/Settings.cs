@@ -2,11 +2,13 @@ namespace myc
 {
     public class Settings
     {
-        public string ProgramFile;
+        public string ProgramFile = "";
         public bool RunThruCodeGen;
         public bool RunThruParser;
         public bool RunThruLexer;
         public bool RunThruTac;
+
+        public bool DebugMode;
 
         public bool RunAssembleLink
         {
@@ -19,16 +21,6 @@ namespace myc
                     !this.RunThruCodeGen &&
                     !this.RunThruTac;
             }
-        }
-
-        public Settings(string file, bool codeGen, bool parse, bool lex, bool tac)
-        {
-            this.ProgramFile = file;
-            this.RunThruCodeGen = codeGen;
-            this.RunThruParser = parse;
-            this.RunThruLexer = lex;
-            this.RunThruTac = tac;
-
         }
     }
 }

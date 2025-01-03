@@ -15,7 +15,7 @@ namespace myc
                 switch (instruction)
                 {
                     case ASM_Mov mov:
-                        //only fix up the mov statements that use stack for both source and dest
+                        // fix up the mov statements that use stack for both source and dest
                         if (
                             mov.Source.GetType() == typeof(ASM_Stack) &&
                             mov.Destination.GetType() == typeof(ASM_Stack))
@@ -23,17 +23,82 @@ namespace myc
                             // Change the Mov instruction to use the R10 register
                             fixedInstructions.Add(new ASM_Mov(mov.Source, new ASM_Register(new ASM_R10())));
                             fixedInstructions.Add(new ASM_Mov(new ASM_Register(new ASM_R10()), mov.Destination));
-                        } else {
+                        }
+                        else
+                        {
+                            //no changes needed just add it back
                             fixedInstructions.Add(mov);
                         }
                         break;
+                    case ASM_Idiv idiv:
+                        // fix up the idiv statements that use a constant
+                        if (idiv.Operand.GetType() == typeof(ASM_Imm))
+                        {
+                            // Add a Mov instruction to use the R10 register for idiv
+                            fixedInstructions.Add(new ASM_Mov(idiv.Operand, new ASM_Register(new ASM_R10())));
+                            fixedInstructions.Add(new ASM_Idiv(new ASM_Register(new ASM_R10())));
+                        }
+                        else
+                        {
+                            //no changes needed just add it back
+                            fixedInstructions.Add(idiv);
+                        }
+                        break;
+                    case ASM_Binary binary:
+                        FixupBinary(fixedInstructions, binary);
+                        break;
                     default:
+                        //no changes needed just add it back
                         fixedInstructions.Add(instruction);
                         break;
                 }
             }
 
             program.Function.Instructions = fixedInstructions;
+        }
+
+        private static void FixupBinary(List<ASM_Instruction> fixedInstructions, ASM_Binary binary)
+        {
+
+            switch (binary.BinaryOp)
+            {
+                case ASM_BinaryAdd:
+                case ASM_BinarySub:
+                    // fix up the Add/Sub statements that use stack for both operands
+                    if (binary.Operand1.GetType() == typeof(ASM_Stack) &&
+                        binary.Operand2.GetType() == typeof(ASM_Stack))
+                    {
+                        // Add a Mov instruction to use the R10 register for first operand
+                        fixedInstructions.Add(new ASM_Mov(binary.Operand1, new ASM_Register(new ASM_R10())));
+                        fixedInstructions.Add(new ASM_Binary(binary.BinaryOp, new ASM_Register(new ASM_R10()), binary.Operand2));
+                    }
+                    else
+                    {
+                        //no changes needed just add it back
+                        fixedInstructions.Add(binary);
+                    }
+                    break;
+                case ASM_BinaryMult:
+                    // fix up the Mult statements that use stack for second operand
+                    if (binary.Operand2.GetType() == typeof(ASM_Stack))
+                    {
+                        // Add a Mov instruction to use the R10 register for first operand
+                        fixedInstructions.Add(new ASM_Mov(binary.Operand2, new ASM_Register(new ASM_R11())));
+                        fixedInstructions.Add(new ASM_Binary(binary.BinaryOp, binary.Operand1, new ASM_Register(new ASM_R11())));
+                        fixedInstructions.Add(new ASM_Mov(new ASM_Register(new ASM_R11()), binary.Operand2));
+                    }
+                    else
+                    {
+                        //no changes needed just add it back
+                        fixedInstructions.Add(binary);
+                    }
+                    break;
+                default:
+                    //no changes needed just add it back
+                    fixedInstructions.Add(binary);
+                    break;
+
+            }
         }
     }
 }

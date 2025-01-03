@@ -35,10 +35,18 @@ namespace myc
                     ASM_Operand newMovDst = ReplaceOperand(mov.Destination);
                     return new ASM_Mov(newMovSrc, newMovDst);
                 case ASM_Unary unary:
-                    ASM_Operand newDst = ReplaceOperand(unary.Operand);
-                    return new ASM_Unary(unary.UnaryOp, newDst);
-                case ASM_Ret rtrn:
-                    return rtrn;
+                    ASM_Operand unaDst = ReplaceOperand(unary.Operand);
+                    return new ASM_Unary(unary.UnaryOp, unaDst);
+                case ASM_Binary binary:
+                    ASM_Operand binOp1 = ReplaceOperand(binary.Operand1);
+                    ASM_Operand binOp2 = ReplaceOperand(binary.Operand2);
+                    return new ASM_Binary(binary.BinaryOp, binOp1, binOp2);
+                case ASM_Idiv iDiv:
+                    ASM_Operand divDst = ReplaceOperand(iDiv.Operand);
+                    return new ASM_Idiv(divDst);
+                case ASM_Ret:
+                case ASM_Cdq:
+                   return instruction;
                 case ASM_AllocateStack:
                 default:
                     throw new ArgumentException(string.Format("Unexpected ASM Instruction Type: {0}", instruction.GetType().Name));

@@ -44,6 +44,19 @@ namespace myc
                     string operand = ConvertOperand(unary.Operand);
                     writer.WriteLine("\t{0} \t{1}", unaryOp, operand);
                     break;
+                case ASM_Binary binary:
+                    string binaryOp = ConvertBinaryOp(binary.BinaryOp);
+                    string binOper1 = ConvertOperand(binary.Operand1);
+                    string binOper2 = ConvertOperand(binary.Operand2);
+                    writer.WriteLine("\t{0} \t{1}, {2}", binaryOp, binOper1, binOper2);
+                    break;
+                case ASM_Idiv iDiv:
+                    string divOperand = ConvertOperand(iDiv.Operand);
+                    writer.WriteLine("\tidivl \t{0}", divOperand);
+                    break;
+                case ASM_Cdq:
+                    writer.WriteLine("\tcdq");
+                    break;
                 case ASM_AllocateStack stack:
                     writer.WriteLine("\tsubq \t${0}, %rsp", stack.Size);
                     break;
@@ -60,7 +73,9 @@ namespace myc
                 ASM_Register register => register.Register switch
                 {
                     ASM_AX => "%eax",
+                    ASM_DX => "%edx",
                     ASM_R10 => "%r10d",
+                    ASM_R11 => "%r11d",
                     _ => throw new InvalidOperationException("Register Not Defined for Conversion: {0}"),
                 },
                 ASM_Stack stack => string.Format("{0}(%rbp)", stack.Stack),
@@ -75,6 +90,17 @@ namespace myc
             {
                 ASM_UnaryNeg => "negl",
                 ASM_UnaryNot => "notl",
+                _ => throw new InvalidOperationException("Unary Operand Not Defined for Conversion: {0}"),
+            };
+        }
+
+        private static string ConvertBinaryOp(ASM_BinaryOp operand)
+        {
+            return operand switch
+            {
+                ASM_BinaryAdd => "addl",
+                ASM_BinarySub => "subl",
+                ASM_BinaryMult => "imull",
                 _ => throw new InvalidOperationException("Unary Operand Not Defined for Conversion: {0}"),
             };
         }

@@ -23,7 +23,7 @@ namespace myc
             Utilities.GCCPreprocessorCleanUp(mySettings.ProgramFile);
 
             //Assemble/Link only if no cmd line parms
-            if (mySettings.RunAssembleLink)
+            if (mySettings.RunAssembleLink && !settings.DebugMode)
             {
                 //Assemble and Link
                 Console.WriteLine("Assemble and Link");
