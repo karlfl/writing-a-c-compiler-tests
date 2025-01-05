@@ -1,4 +1,4 @@
 //This is a test
 int main(void) {
-    return 3 ^ 5;
+    return 3 <= 5;
 }

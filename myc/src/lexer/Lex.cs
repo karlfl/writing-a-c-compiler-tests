@@ -34,10 +34,10 @@ namespace myc
             new("LogicalOR",       @"^\|\|",            (name)=>TokensEnum.LogicalOR.ToString()),
             new("EqualEqual",      @"^==",              (name)=>TokensEnum.EqualEqual.ToString()),
             new("NotEqual",        @"^!=",              (name)=>TokensEnum.NotEqual.ToString()),
-            new("LessThan",        @"^<",               (name)=>TokensEnum.LessThan.ToString()),
-            new("GreaterThan",     @"^>",               (name)=>TokensEnum.GreaterThan.ToString()),
-            new("LessOrEqual",     @"^<=",              (name)=>TokensEnum.LessOrEqual.ToString()),
-            new("GreaterOrEqual",  @"^>=",              (name)=>TokensEnum.GreaterOrEqual.ToString()),
+            new("LessThan",        @"^\<",               (name)=>TokensEnum.LessThan.ToString()),
+            new("GreaterThan",     @"^\>",               (name)=>TokensEnum.GreaterThan.ToString()),
+            new("LessOrEqual",     @"^\<=",              (name)=>TokensEnum.LessOrEqual.ToString()),
+            new("GreaterOrEqual",  @"^\>=",              (name)=>TokensEnum.GreaterOrEqual.ToString()),
        ];
 
 

@@ -22,4 +22,12 @@ namespace myc
             return "-";
         }
     }
-}
+
+    public class TAC_Not : TAC_UnaryOp
+    {
+
+        public override string Print()
+        {
+            return "!";
+        }
+    }}
