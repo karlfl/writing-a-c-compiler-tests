@@ -1,6 +1,7 @@
 namespace myc
 {
-    public abstract class TAC_BinaryOp { 
+    public abstract class TAC_BinaryOp
+    {
         public abstract string Print();
     }
 
@@ -46,4 +47,53 @@ namespace myc
         {
             return "%";
         }
-    }}
+    }
+    public class TAC_Equal : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "=";
+        }
+    }
+    public class TAC_NotEqual : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "!=";
+        }
+    }
+    public class TAC_LessThan : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "<";
+        }
+    }
+    public class TAC_LessOrEqual : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "<=";
+        }
+    }
+    public class TAC_GreaterThan : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return ">";
+        }
+    }
+    public class TAC_GreaterOrEqual : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return ">=";
+        }
+    }
+}

@@ -41,4 +41,58 @@ namespace myc
         }
     }
 
+    public class TAC_Copy(TAC_Value source, TAC_Value destination) : TAC_Instruction
+    {
+        public readonly TAC_Value Source = source;
+        public readonly TAC_Value Destination = destination;
+
+        public override string Print()
+        {
+            return string.Format("    Copy {0}, {1})", this.Source.Print(), this.Destination.Print() );
+        }
+    }
+
+    public class TAC_Jump(TAC_Label target) : TAC_Instruction
+    {
+        public readonly TAC_Label Target = target;
+
+        public override string Print()
+        {
+            return string.Format("    JumpZero {0})", this.Target.Print() );
+        }
+    }
+
+
+    public class TAC_JumpIfZero(TAC_Value condition, TAC_Label target) : TAC_Instruction
+    {
+        public readonly TAC_Value Condition = condition;
+        public readonly TAC_Label Target = target;
+
+        public override string Print()
+        {
+            return string.Format("    JumpIfZero({0}, {1})", this.Condition.Print(), this.Target.Print() );
+        }
+    }
+
+    public class TAC_JumpNotZero(TAC_Value condition, TAC_Label target) : TAC_Instruction
+    {
+        public readonly TAC_Value Condition = condition;
+        public readonly TAC_Label Target = target;
+
+        public override string Print()
+        {
+            return string.Format("    JumpNotZero({0}, {1})", this.Condition.Print(), this.Target.Print() );
+        }
+    }
+
+    public class TAC_Label(string identifier) : TAC_Instruction
+    {
+        public readonly string Identifier = identifier;
+
+        public override string Print()
+        {
+            return string.Format("    Label({0})", this.Identifier);
+        }
+    }
+
 }

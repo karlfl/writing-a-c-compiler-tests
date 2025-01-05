@@ -82,5 +82,9 @@ namespace myc
             //* when we start tracking symbols in later chapters
             return string.Format("tmp.{0}", UniqueIdCounter++);
         }
+
+        public static string GenerateUniqueLabel(string prefix){
+            return string.Format("{0}.{1}",prefix, UniqueIdCounter++);
+        }
     }
 }
