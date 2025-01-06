@@ -31,6 +31,7 @@ namespace myc
         GreaterThan,
         LessOrEqual,
         GreaterOrEqual,
+        Assignment,
         //(* punctuation *)
         OpenParen,
         CloseParen,
