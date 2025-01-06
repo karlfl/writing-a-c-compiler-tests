@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace myc
 {
     public class ASM_Instruction
@@ -28,7 +30,35 @@ namespace myc
         public readonly ASM_Operand Operand = operand;
     }
 
-    public class ASM_Cdq() : ASM_Instruction{}
+    public class ASM_Cdq() : ASM_Instruction { }
+
+    public class ASM_Cmp(ASM_Operand operand1, ASM_Operand operand2) : ASM_Instruction
+    {
+        public readonly ASM_Operand Operand1 = operand1;
+        public readonly ASM_Operand Operand2 = operand2;
+    }
+
+    public class ASM_Jmp(string identifier) : ASM_Instruction
+    {
+        public readonly string Identifier = identifier;
+    }
+
+    public class ASM_JmpCC(ASM_CondCode condCode, string identifier) : ASM_Instruction
+    {
+        public readonly ASM_CondCode ConditionCode = condCode;
+        public readonly string Identifier = identifier;
+    }
+
+    public class ASM_SetCC(ASM_CondCode condCode, ASM_Operand operand) : ASM_Instruction
+    {
+        public readonly ASM_CondCode ConditionCode = condCode;
+        public readonly ASM_Operand Operand = operand;
+    }
+
+    public class ASM_Label(string identifier) : ASM_Instruction
+    {
+        public readonly string Identifier = identifier;
+    }
 
     public class ASM_AllocateStack(int size) : ASM_Instruction
     {
@@ -39,5 +69,4 @@ namespace myc
     {
         public ASM_Ret() { }
     }
-
 }

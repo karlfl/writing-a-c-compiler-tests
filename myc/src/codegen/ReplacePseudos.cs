@@ -44,9 +44,19 @@ namespace myc
                 case ASM_Idiv iDiv:
                     ASM_Operand divDst = ReplaceOperand(iDiv.Operand);
                     return new ASM_Idiv(divDst);
-                case ASM_Ret:
+                case ASM_Cmp cmp:
+                    ASM_Operand cmpOp1 = ReplaceOperand(cmp.Operand1);
+                    ASM_Operand cmpOp2 = ReplaceOperand(cmp.Operand2);
+                    return new ASM_Cmp(cmpOp1, cmpOp2);
+                case ASM_SetCC setCC:
+                    ASM_Operand ccOp = ReplaceOperand(setCC.Operand);
+                    return new ASM_SetCC(setCC.ConditionCode, ccOp);
                 case ASM_Cdq:
-                   return instruction;
+                case ASM_Ret:
+                case ASM_Jmp:
+                case ASM_JmpCC:
+                case ASM_Label:
+                    return instruction;
                 case ASM_AllocateStack:
                 default:
                     throw new ArgumentException(string.Format("Unexpected ASM Instruction Type: {0}", instruction.GetType().Name));

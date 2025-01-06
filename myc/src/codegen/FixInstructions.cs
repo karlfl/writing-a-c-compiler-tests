@@ -44,6 +44,26 @@ namespace myc
                             fixedInstructions.Add(idiv);
                         }
                         break;
+                    case ASM_Cmp cmp:
+                        // Fix up the cmp that has memory address for both operands
+                        if (cmp.Operand1.GetType() == typeof(ASM_Stack) &&
+                           cmp.Operand2.GetType() == typeof(ASM_Stack))
+                        {
+                            fixedInstructions.Add(new ASM_Mov(cmp.Operand1, new ASM_Register(new ASM_R10())));
+                            fixedInstructions.Add(new ASM_Cmp(new ASM_Register(new ASM_R10()), cmp.Operand2));
+                        }
+                        // Fix up the cmp that has constant address second operand
+                        else if (cmp.Operand2.GetType() == typeof(ASM_Imm))
+                        {
+                            fixedInstructions.Add(new ASM_Mov(cmp.Operand2, new ASM_Register(new ASM_R11())));
+                            fixedInstructions.Add(new ASM_Cmp(cmp.Operand1, new ASM_Register(new ASM_R11())));
+                        }
+                        else
+                        {
+                            //no changes needed just add it back
+                            fixedInstructions.Add(cmp);
+                        }
+                        break;
                     case ASM_Binary binary:
                         FixupBinary(fixedInstructions, binary);
                         break;
