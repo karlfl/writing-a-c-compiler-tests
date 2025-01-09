@@ -2,25 +2,42 @@ using System.Text;
 
 namespace myc
 {
-    public class AST_Statement : AST_Base
+    public abstract class AST_Statement : AST_Base
     {
-        public readonly TokensEnum Instruction;
-        public readonly AST_Factor Expression;
+        public abstract string Print();
+    }
+    public class AST_Return(AST_Factor expression) : AST_Statement
+    {
+        public readonly AST_Factor Expression = expression;
 
-
-        public AST_Statement(TokensEnum instruction, AST_Factor expression)
-        {
-            this.Instruction = instruction;
-            this.Expression = expression;
-        }
-
-        public string Print()
+        public override string Print()
         {
             StringBuilder output = new();
             output.AppendLine("Return(");
-            output.AppendLine(string.Format("            {0}",this.Expression.Print()));
+            output.AppendLine(string.Format("            {0}", this.Expression.Print()));
             output.AppendLine("        )");
             return output.ToString();
+        }
+    }
+
+    public class AST_Expression(AST_Factor expression) : AST_Statement
+    {
+        public readonly AST_Factor Expression = expression;
+
+        public override string Print()
+        {
+            StringBuilder output = new();
+            output.AppendLine("Return(");
+            output.AppendLine(string.Format("            {0}", this.Expression.Print()));
+            output.AppendLine("        )");
+            return output.ToString();
+        }
+    }
+
+    public class AST_Null() : AST_Statement {
+        public override string Print()
+        {
+            return "null";
         }
     }
 }

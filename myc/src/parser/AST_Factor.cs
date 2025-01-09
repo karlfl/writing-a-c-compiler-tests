@@ -1,3 +1,5 @@
+using System.Reflection.Metadata.Ecma335;
+
 namespace myc
 {
     public abstract class AST_Factor : AST_Base
@@ -12,6 +14,14 @@ namespace myc
         public override string Print()
         {
             return string.Format("{0}", this.Value);
+        }
+    }
+
+    public class AST_Var(AST_Identifier identifier) : AST_Factor{
+        public readonly AST_Identifier Identifier = identifier;
+        public override string Print()
+        {
+            return string.Format("{0}", this.Identifier.Name);  
         }
     }
     
@@ -40,4 +50,15 @@ namespace myc
 
     }
 
+    public class AST_Assignment(AST_Factor leftFactor, AST_Factor rightFactor) : AST_Factor
+    {
+        public readonly AST_Factor LeftFactor = leftFactor;
+        public readonly AST_Factor RightFactor = rightFactor;
+
+        public override string Print()
+        {
+            return string.Format("{0} = {1}", LeftFactor.Print(), RightFactor.Print());
+        }
+
+    }
 }

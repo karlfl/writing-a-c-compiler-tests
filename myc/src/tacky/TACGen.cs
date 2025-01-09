@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace myc
 {
     public static class TACGen
@@ -10,17 +12,46 @@ namespace myc
 
         static TAC_Function EmitFunction(AST_Function function)
         {
-            List<TAC_Instruction> instructions = EmitForStatements(function.Statements);
+            List<TAC_Instruction> instructions = EmitForStatements(function.Body);
+            //Extra return;
+            instructions.Add(new TAC_Return(new TAC_Constant(0)));
+
             return new(function.Identifier.Name, instructions);
         }
 
-        static List<TAC_Instruction> EmitForStatements(List<AST_Statement> statements)
+        static List<TAC_Instruction> EmitForStatements(List<AST_BlockItem> blockItems)
         {
             List<TAC_Instruction> instructions = [];
 
-            var (instr, value) = EmitForExpression(statements[0].Expression);
-            instructions.AddRange(instr);
-            instructions.Add(new TAC_Return(value));
+            foreach (AST_BlockItem blockItem in blockItems)
+            {
+                switch (blockItem)
+                {
+                    case AST_BlockStatement statement:
+                        switch (statement.Statement)
+                        {
+                            case AST_Return aReturn:
+                                var (instr, value) = EmitForExpression(aReturn.Expression);
+                                instructions.AddRange(instr);
+                                instructions.Add(new TAC_Return(value));
+                                break;
+                            case AST_Expression aExp:
+                                // evaluate expression but don't use result.
+                                var (expInstr, _) = EmitForExpression(aExp.Expression);
+                                instructions.AddRange(expInstr);
+                                break;
+                            case AST_Null:
+                                break;
+                            default:
+                                throw new ArgumentException("TAC: Unexpected AST Expression type");
+                        }
+                        break;
+                    case AST_BlockDeclaration declaration:
+                        break;
+                    default:
+                        throw new ArgumentException("TAC: Unexpected AST Block Item type");
+                }
+            }
 
             return instructions;
         }
@@ -98,15 +129,15 @@ namespace myc
             TAC_Variable dst = new(Utilities.GenerateUniqueId());
 
             instr.AddRange(leftCond);
-            instr.Add(new TAC_JumpIfZero(valLeft,falseLabel));
+            instr.Add(new TAC_JumpIfZero(valLeft, falseLabel));
             instr.AddRange(rightCond);
-            instr.Add(new TAC_JumpIfZero(valRight,falseLabel));
+            instr.Add(new TAC_JumpIfZero(valRight, falseLabel));
             instr.Add(new TAC_Copy(new TAC_Constant(1), dst));
             instr.Add(new TAC_Jump(endLabel));
             instr.Add(falseLabel);
             instr.Add(new TAC_Copy(new TAC_Constant(0), dst));
             instr.Add(endLabel);
-            
+
 
             return (instr, dst);
         }
@@ -122,9 +153,9 @@ namespace myc
             TAC_Variable dst = new(Utilities.GenerateUniqueId());
 
             instr.AddRange(leftCond);
-            instr.Add(new TAC_JumpNotZero(valLeft,trueLabel));
+            instr.Add(new TAC_JumpNotZero(valLeft, trueLabel));
             instr.AddRange(rightCond);
-            instr.Add(new TAC_JumpNotZero(valRight,trueLabel));
+            instr.Add(new TAC_JumpNotZero(valRight, trueLabel));
             instr.Add(new TAC_Copy(new TAC_Constant(0), dst));
             instr.Add(new TAC_Jump(endLabel));
             instr.Add(trueLabel);

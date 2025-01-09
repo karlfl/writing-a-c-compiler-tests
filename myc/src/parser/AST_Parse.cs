@@ -46,10 +46,59 @@ namespace myc
             Expect(TokensEnum.KWVoid);
             Expect(TokensEnum.CloseParen);
             Expect(TokensEnum.OpenBrace);
-            AST_Statement stmt = Parse_Statement();
+
+            TokensEnum nextToken = TokenStream.Peek_TokenEnum();
+
+            List<AST_BlockItem> blockItems = [];
+            while (nextToken != TokensEnum.CloseBrace)
+            {
+                blockItems.Add(Parse_BlockItem());
+                nextToken = TokenStream.Peek_TokenEnum();
+            }
+            // AST_Statement stmt = Parse_Statement();
             Expect(TokensEnum.CloseBrace);
 
-            return new(ident, stmt);
+            return new(ident, blockItems);
+        }
+
+        public AST_BlockItem Parse_BlockItem()
+        {
+            TokensEnum token = TokenStream.Peek_TokenEnum();
+
+            switch (token)
+            {
+                case TokensEnum.KWInt:
+                    return new AST_BlockDeclaration(Parse_Declaration());
+                default:
+                    return new AST_BlockStatement(Parse_Statement());
+            }
+
+        }
+
+
+        //(* <declaration> ::= "int" <identifier> [ "=" <exp> ] ";" *)
+        public AST_Declaration Parse_Declaration()
+        {
+            Expect(TokensEnum.KWInt);
+            AST_Identifier ident = Parse_Identifier();
+
+            TokensEnum keyToken = Enum.Parse<TokensEnum>(TokenStream.Get_Token());
+            AST_Factor? init_exp;
+            switch (keyToken)
+            {
+                case TokensEnum.Semicolon:
+                    init_exp = null;
+                    break;
+                case TokensEnum.Assignment:
+                    Console.WriteLine("found Assignment");
+                    init_exp = Parse_Expression(0);
+                    Expect(TokensEnum.Semicolon);
+                    break;
+                default:
+                    throw new Exception(string.Format("Invalid Decaration Token: {0}", keyToken));
+            }
+
+            return new(ident.Name, init_exp);
         }
 
         public AST_Identifier Parse_Identifier()
@@ -71,33 +120,60 @@ namespace myc
 
         public AST_Statement Parse_Statement()
         {
-            Expect(TokensEnum.KWReturn);
-            AST_Factor expr = Parse_Expression(0);
-            Expect(TokensEnum.Semicolon);
+            Console.WriteLine("Entering Parse_Statement");
+            TokensEnum token = TokenStream.Peek_TokenEnum();
 
-            return new(TokensEnum.KWReturn, expr);
+            switch (token)
+            {
+                case TokensEnum.KWReturn:
+                    Expect(TokensEnum.KWReturn);
+                    AST_Factor retExpr = Parse_Expression(0);
+                    Expect(TokensEnum.Semicolon);
+                    return new AST_Return(retExpr);
+                case TokensEnum.Semicolon:
+                    Expect(TokensEnum.Semicolon);
+                    return new AST_Null();
+                default:
+                    AST_Factor expr = Parse_Expression(0);
+                    Expect(TokensEnum.Semicolon);
+                    return new AST_Expression(expr);
+            };
         }
 
         public AST_Factor Parse_Expression(int minPrecedence)
         {
+
             AST_Factor leftFactor = Parse_Factor();
 
             TokensEnum nextToken = TokenStream.Peek_TokenEnum();
+            Console.WriteLine(string.Format("Entering Parse_Expression: {0}",nextToken));
 
             // Parse expression loop
-            while (
-                IsBinaryOp(nextToken) &&
-                GetPrecedence(nextToken) >= minPrecedence)
+            while (GetPrecedence(nextToken) >= minPrecedence)
             {
-                AST_BinaryOp oper = Parse_BinaryOp();
-                AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken) + 1);
+                if (nextToken == TokensEnum.Assignment)
+                {
+                    Console.WriteLine("Handle Token");
+                    string _ = TokenStream.Get_Token();  //consume the '=' token
+                    AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken));
 
-                leftFactor = new AST_Binary(leftFactor, oper, rightFactor);
+                    leftFactor = new AST_Assignment(leftFactor, rightFactor);
+                    Console.WriteLine(string.Format("assignment {0}", leftFactor.Print()));
+                }
+                else
+                {
+                    Console.WriteLine("Handle Other");
+                    AST_BinaryOp oper = Parse_BinaryOp();
+                    AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken) + 1);
 
+                    leftFactor = new AST_Binary(leftFactor, oper, rightFactor);
+                    Console.WriteLine(string.Format("binary {0}", leftFactor.Print()));
+                }
                 //Peek to see what the next token is
                 nextToken = TokenStream.Peek_TokenEnum();
+                Console.WriteLine(string.Format("Next Token: {0}", nextToken));
             }
-
+            Console.WriteLine("Leaving Parse_Expression");
             return leftFactor;
         }
 
@@ -105,10 +181,13 @@ namespace myc
         {
             TokensEnum keyToken = TokenStream.Peek_TokenEnum();
 
+            Console.WriteLine(string.Format("Enter Parse_Factor {0}",keyToken));
             switch (keyToken)
             {
                 case TokensEnum.Constant:
                     return Parse_Constant();
+                case TokensEnum.Identifier:
+                    return new AST_Var(Parse_Identifier());
                 case TokensEnum.Tilde:
                 case TokensEnum.Hyphen:
                 case TokensEnum.LogicalNOT:
@@ -193,7 +272,7 @@ namespace myc
                     return new AST_GreaterOrEqual();
 
                 default:
-                    throw new Exception("Invalid Binary Op Token");
+                    throw new Exception(string.Format("Invalid Binary Op Token: {0}", keyToken));
             }
         }
 
@@ -242,6 +321,8 @@ namespace myc
                 TokensEnum.LogicalAND => 10,
 
                 TokensEnum.LogicalOR => 5,
+
+                TokensEnum.Assignment => 1,
 
                 _ => 0,
             };

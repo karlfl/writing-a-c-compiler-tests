@@ -2,8 +2,8 @@ namespace myc
 {
     public class TokenStream(StringReader tokenStream)
     {
-        public readonly StringReader Stream = tokenStream;
-        public Stack<string> PeekBuffer = [];
+        readonly StringReader Stream = tokenStream;
+        Stack<string> PeekBuffer = [];
 
         public string Get_Token()
         {
@@ -20,8 +20,8 @@ namespace myc
         {
             // if there is already a token in the peek buffer use that
             // otherwise read the token from the stream.
-            string token = (PeekBuffer.Count > 0) ? PeekBuffer.Pop() : ReadToken();
-
+            // string token = (PeekBuffer.Count > 0) ? PeekBuffer.Pop() : ReadToken();
+            string token = ReadToken();
             // Since we're just peeking, place the token in a buffer to get later.
             PeekBuffer.Push(token);
 

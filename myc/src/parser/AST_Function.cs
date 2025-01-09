@@ -5,12 +5,12 @@ namespace myc
     public class AST_Function : AST_Base
     {
         public readonly AST_Identifier Identifier;
-        public readonly List<AST_Statement> Statements = [];
+        public readonly List<AST_BlockItem> Body = [];
 
-        public AST_Function(AST_Identifier identifier, AST_Statement statement)
+        public AST_Function(AST_Identifier identifier, List<AST_BlockItem> body)
         {
             this.Identifier = identifier;
-            this.Statements.Add(statement);
+            this.Body = body;
         }
 
         public string Print()
@@ -18,8 +18,12 @@ namespace myc
             StringBuilder output = new();
             output.AppendLine("    Function(");
             output.AppendLine(string.Format("        name=\"{0}\",", this.Identifier.Print()));
-            string body = this.Statements[0].Print();
-            output.AppendLine(string.Format("        body={0}", body));
+            output.AppendLine("        body={");
+            foreach (AST_BlockItem blockItem in this.Body)
+            {
+                output.AppendLine(string.Format("            {0}", blockItem.Print()));
+            }
+            output.AppendLine("        }");
             output.AppendLine("    )");
             return output.ToString();
         }

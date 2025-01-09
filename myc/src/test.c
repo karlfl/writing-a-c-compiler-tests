@@ -1,4 +1,6 @@
 //This is a test
 int main(void) {
-    return 3 <= 5;
+    a = 1 + 2;
+    int a;
+    return a;
 }
