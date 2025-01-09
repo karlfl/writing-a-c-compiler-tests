@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C#: myc",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/myc/bin/Debug/net8.0/myc",
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole", 
+            "args": ["--parse", "${workspaceFolder}/myc/src/test.c"],
+            "preLaunchTask": "dotnet: build /workspaces/writing-a-c-compiler-tests/myc/myc.csproj"
+        }
+    ]
+}

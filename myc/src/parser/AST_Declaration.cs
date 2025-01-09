@@ -4,8 +4,12 @@ namespace myc
     {
         public readonly string Name = name;
         public readonly AST_Factor? Init = init;
-        public string Print(){
-            return string.Format("{0} = {1}", Name, Init);
+        public string Print()
+        {
+            if (this.Init == null)
+                return string.Format("{0}", Name);
+            else
+                return string.Format("{0} = {1}", Name, Init);
         }
     }
 }

@@ -12,11 +12,7 @@ namespace myc
 
         public override string Print()
         {
-            StringBuilder output = new();
-            output.AppendLine("Return(");
-            output.AppendLine(string.Format("            {0}", this.Expression.Print()));
-            output.AppendLine("        )");
-            return output.ToString();
+            return string.Format("return({0})", this.Expression.Print());
         }
     }
 
@@ -26,11 +22,7 @@ namespace myc
 
         public override string Print()
         {
-            StringBuilder output = new();
-            output.AppendLine("Return(");
-            output.AppendLine(string.Format("            {0}", this.Expression.Print()));
-            output.AppendLine("        )");
-            return output.ToString();
+            return string.Format("{0}", this.Expression.Print());
         }
     }
 

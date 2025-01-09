@@ -2,16 +2,10 @@ using System.Text;
 
 namespace myc
 {
-    public class AST_Function : AST_Base
+    public class AST_Function(AST_Identifier identifier, List<AST_BlockItem> body) : AST_Base
     {
-        public readonly AST_Identifier Identifier;
-        public readonly List<AST_BlockItem> Body = [];
-
-        public AST_Function(AST_Identifier identifier, List<AST_BlockItem> body)
-        {
-            this.Identifier = identifier;
-            this.Body = body;
-        }
+        public readonly AST_Identifier Identifier = identifier;
+        public readonly List<AST_BlockItem> Body = body;
 
         public string Print()
         {
