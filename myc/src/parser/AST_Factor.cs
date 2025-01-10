@@ -70,7 +70,7 @@ namespace myc
 
         public override string Print()
         {
-            return string.Format("({0} ? {1} : {2})", Condition.Print(), ThenClause.Print(), ElseClause.Print());
+            return string.Format("{0} ? {1} : {2}", Condition.Print(), ThenClause.Print(), ElseClause.Print());
         }
 
     }

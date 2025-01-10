@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace myc
 {
@@ -29,23 +30,8 @@ namespace myc
                 switch (blockItem)
                 {
                     case AST_BlockStatement statement:
-                        switch (statement.Statement)
-                        {
-                            case AST_Return aReturn:
-                                var (instr, value) = EmitForExpression(aReturn.Expression);
-                                instructions.AddRange(instr);
-                                instructions.Add(new TAC_Return(value));
-                                break;
-                            case AST_Expression aExp:
-                                // evaluate expression but don't use result.
-                                var (expInstr, _) = EmitForExpression(aExp.Expression);
-                                instructions.AddRange(expInstr);
-                                break;
-                            case AST_Null:
-                                break;
-                            default:
-                                throw new ArgumentException(string.Format("TAC: Unexpected AST Expression type: {0}", statement.Statement.GetType()));
-                        }
+                        var stmtInstr = EmitForStatement(statement.Statement);
+                        instructions.AddRange(stmtInstr);
                         break;
                     case AST_BlockDeclaration declaration:
                         switch (declaration.Declaration.Init)
@@ -68,6 +54,69 @@ namespace myc
             return instructions;
         }
 
+        private static List<TAC_Instruction> EmitForStatement(AST_Statement statement)
+        {
+            List<TAC_Instruction> instructions = [];
+
+            switch (statement)
+            {
+                case AST_Return aReturn:
+                    var (instr, value) = EmitForExpression(aReturn.Expression);
+                    instructions.AddRange(instr);
+                    instructions.Add(new TAC_Return(value));
+                    break;
+                case AST_Expression aExp:
+                    // evaluate expression but don't use result.
+                    var (expInstr, _) = EmitForExpression(aExp.Expression);
+                    instructions.AddRange(expInstr);
+                    break;
+                case AST_If aIf:
+                    var ifInstr = EmitForIfStatement(aIf);
+                    instructions.AddRange(ifInstr);
+                    break;
+                case AST_Null:
+                    break;
+                default:
+                    throw new ArgumentException(string.Format("TAC: Unexpected AST Expression type: {0}", statement.GetType()));
+            }
+
+            return instructions;
+        }
+
+        private static List<TAC_Instruction> EmitForIfStatement(AST_If ifStatement)
+        {
+            List<TAC_Instruction> instr = [];
+
+            var (condInstr, condResult) = EmitForExpression(ifStatement.Condition);
+            var thenInstr = EmitForStatement(ifStatement.ThenStatement);
+            TAC_Label endLabel = new(Utilities.GenerateUniqueLabel("if_end"));
+
+            if (ifStatement.ElseStatement == null)
+            {
+                // null else statement
+                instr.AddRange(condInstr);
+                instr.Add(new TAC_JumpIfZero(condResult, endLabel));
+                instr.AddRange(thenInstr);
+                instr.Add(endLabel);
+            }
+            else
+            {
+                //full if/else statement
+                var elseInstr = EmitForStatement(ifStatement.ElseStatement);
+                TAC_Label elseLabel = new(Utilities.GenerateUniqueLabel("else"));
+
+                instr.AddRange(condInstr);
+                instr.Add(new TAC_JumpIfZero(condResult, elseLabel));
+                instr.AddRange(thenInstr);
+                instr.Add(new TAC_Jump(endLabel));
+                instr.Add(elseLabel);
+                instr.AddRange(elseInstr);
+                instr.Add(endLabel);
+            }
+
+            return instr;
+        }
+
         private static (List<TAC_Instruction> instructions, TAC_Value value) EmitForExpression(AST_Factor expression)
         {
             switch (expression)
@@ -82,6 +131,8 @@ namespace myc
                     return ([], new TAC_Variable(var.Identifier.Name));
                 case AST_Assignment asmt:
                     return EmitAssignment(asmt);
+                case AST_Conditional cond:
+                    return EmitForCondAssignment(cond);
                 default:
                     throw new ArgumentException(string.Format("TAC: Unexpected AST Expression type: {0}", expression.GetType()));
             }
@@ -211,6 +262,30 @@ namespace myc
                 default:
                     throw new Exception(string.Format("TAC: Invalid Assignment Left Factor: {0}", asmt.LeftFactor.GetType()));
             }
+        }
+
+        private static (List<TAC_Instruction> instructions, TAC_Value value) EmitForCondAssignment(AST_Conditional cond)
+        {
+            List<TAC_Instruction> instr = [];
+
+            var (condInstr, condResult) = EmitForExpression(cond.Condition);
+            var (thenInstr, thenResult) = EmitForExpression(cond.ThenClause);
+            var (elseInstr, elseResult) = EmitForExpression(cond.ElseClause);
+            TAC_Label elseLabel = new(Utilities.GenerateUniqueLabel("cond_else"));
+            TAC_Label endLabel = new(Utilities.GenerateUniqueLabel("cond_end"));
+            TAC_Variable dst = new(Utilities.GenerateUniqueId());
+
+            instr.AddRange(condInstr);
+            instr.Add(new TAC_JumpIfZero(condResult, elseLabel));
+            instr.AddRange(thenInstr);
+            instr.Add(new TAC_Copy(thenResult, dst));
+            instr.Add(new TAC_Jump(endLabel));
+            instr.Add(elseLabel);
+            instr.AddRange(elseInstr);
+            instr.Add(new TAC_Copy(elseResult, dst));
+            instr.Add(endLabel);
+
+            return (instr, dst);
         }
     }
 }

@@ -171,7 +171,7 @@ namespace myc
                 {
                     AST_Factor middleFactor = Parse_ConditionalMiddle();
                     AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken));
-                    leftFactor = new AST_Conditional(leftFactor, rightFactor, middleFactor);
+                    leftFactor = new AST_Conditional(leftFactor, middleFactor, rightFactor);
                 }
                 else
                 {
