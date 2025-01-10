@@ -26,7 +26,7 @@ namespace myc
             if (mySettings.RunAssembleLink && !settings.DebugMode)
             {
                 //Assemble and Link
-                Console.WriteLine("Assemble and Link");
+                Console.WriteLine("Assemble and Link {0}", mySettings.ProgramFile);
                 Utilities.AssembleAndLink(mySettings.ProgramFile);
 
                 //cleanup asm file

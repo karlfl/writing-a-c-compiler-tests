@@ -12,8 +12,8 @@
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole", 
-            "args": ["--validate", "${workspaceFolder}/myc/src/test.c"],
-            "preLaunchTask": "dotnet: build ${workspaceFolder}/myc/bin/Debug/net8.0/myc"
+            "args": ["--tacky", "${workspaceFolder}/myc/src/test.c"],
+            // "preLaunchTask": "dotnet: build ${workspaceFolder}/myc/bin/Debug/net8.0/myc"
         }
     ]
 }

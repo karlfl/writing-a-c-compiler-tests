@@ -35,7 +35,7 @@ namespace myc
         {
             if (variableMap.ContainsKey(declaration.Name))
             {
-                throw new Exception("Duplicate variable declaration");
+                throw new Exception("Resolve: Duplicate variable declaration");
             }
 
             // Generate a new unique variable name

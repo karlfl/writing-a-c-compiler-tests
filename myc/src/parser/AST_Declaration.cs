@@ -9,7 +9,7 @@ namespace myc
             if (this.Init == null)
                 return string.Format("{0}", Name);
             else
-                return string.Format("{0} = {1}", Name, Init);
+                return string.Format("{0} = {1}", Name, Init.Print());
         }
     }
 }

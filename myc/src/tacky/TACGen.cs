@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics;
 
 namespace myc
@@ -43,10 +44,21 @@ namespace myc
                             case AST_Null:
                                 break;
                             default:
-                                throw new ArgumentException("TAC: Unexpected AST Expression type");
+                                throw new ArgumentException(string.Format("TAC: Unexpected AST Expression type: {0}", statement.Statement.GetType()));
                         }
                         break;
                     case AST_BlockDeclaration declaration:
+                        switch (declaration.Declaration.Init)
+                        {
+                            case AST_Factor init:
+                                // treat declaration with initializer like an assignment expression
+                                AST_Assignment asmt = new(new AST_Var(new(declaration.Declaration.Name)), init);
+                                var (instr, _) = EmitForExpression(asmt);
+                                instructions.AddRange(instr);
+                                break;
+                            default:
+                                break;
+                        }
                         break;
                     default:
                         throw new ArgumentException("TAC: Unexpected AST Block Item type");
@@ -66,8 +78,12 @@ namespace myc
                     return EmitUnary(unary);
                 case AST_Binary binary:
                     return EmitBinary(binary);
+                case AST_Var var:
+                    return ([], new TAC_Variable(var.Identifier.Name));
+                case AST_Assignment asmt:
+                    return EmitAssignment(asmt);
                 default:
-                    throw new ArgumentException("TAC: Unexpected AST Expression type");
+                    throw new ArgumentException(string.Format("TAC: Unexpected AST Expression type: {0}", expression.GetType()));
             }
 
         }
@@ -181,6 +197,20 @@ namespace myc
                 AST_GreaterOrEqual => new TAC_GreaterOrEqual(),
                 _ => throw new ArgumentException("Unexpected AST Binary Operation"),
             };
+        }
+
+        private static (List<TAC_Instruction> instructions, TAC_Value value) EmitAssignment(AST_Assignment asmt)
+        {
+            switch (asmt.LeftFactor)
+            {
+                case AST_Var var:
+                    var (instr, rightResult) = EmitForExpression(asmt.RightFactor);
+                    TAC_Variable dst = new(var.Identifier.Name);
+                    instr.Add(new TAC_Copy(rightResult, dst));
+                    return (instr, dst);
+                default:
+                    throw new Exception(string.Format("TAC: Invalid Assignment Left Factor: {0}", asmt.LeftFactor.GetType()));
+            }
         }
     }
 }

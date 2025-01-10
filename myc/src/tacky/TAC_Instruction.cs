@@ -48,7 +48,7 @@ namespace myc
 
         public override string Print()
         {
-            return string.Format("    Copy {0}, {1})", this.Source.Print(), this.Destination.Print() );
+            return string.Format("    Copy ({0}, {1})", this.Source.Print(), this.Destination.Print() );
         }
     }
 
