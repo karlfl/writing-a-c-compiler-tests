@@ -39,8 +39,6 @@ namespace myc
             new("LessOrEqual",     @"<=",              (name)=>TokensEnum.LessOrEqual.ToString()),
             new("GreaterOrEqual",  @">=",              (name)=>TokensEnum.GreaterOrEqual.ToString()),
             new("Assignment",      @"=",               (name)=>TokensEnum.Assignment.ToString()),
-            new("IfCond",          @"if",              (name)=>TokensEnum.KWIf.ToString()),
-            new("ElseCond",        @"else",            (name)=>TokensEnum.KWElse.ToString()),
             new("?Cond",           @"\?",              (name)=>TokensEnum.QuestionMark.ToString()),
             new(":Cond",           @":",               (name)=>TokensEnum.Colon.ToString()),
        ];
@@ -86,6 +84,8 @@ namespace myc
                 "int" => TokensEnum.KWInt.ToString(),
                 "return" => TokensEnum.KWReturn.ToString(),
                 "void" => TokensEnum.KWVoid.ToString(),
+                "if" => TokensEnum.KWIf.ToString(),
+                "else" => TokensEnum.KWElse.ToString(),
                 _ => string.Format("{0} \"{1}\"", TokensEnum.Identifier.ToString(), name),
             };
         }
