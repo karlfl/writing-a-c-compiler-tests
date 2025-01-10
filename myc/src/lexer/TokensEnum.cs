@@ -9,6 +9,8 @@ namespace myc
         KWInt,
         KWReturn,
         KWVoid,
+        KWIf,
+        KWElse,
         //(* Operators *)
         Tilde,
         Hyphen,
@@ -37,6 +39,8 @@ namespace myc
         CloseParen,
         OpenBrace,
         CloseBrace,
-        Semicolon
+        Semicolon,
+        QuestionMark,
+        Colon
     }
 }
