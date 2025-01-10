@@ -5,7 +5,7 @@ namespace myc
     {
         internal static Dictionary<string, string> variableMap = [];
 
-        public static AST_Program ResolveEventArgs(AST_Program program)
+        public static AST_Program Resolve(AST_Program program)
         {
             return new AST_Program(Resolve_Function(program.Function));
         }
@@ -43,7 +43,7 @@ namespace myc
             variableMap.Add(declaration.Name, uniqueName);
 
             // Resolve initializer if there is one
-            AST_Factor? init = declaration.Init ?? Resolve_Expression(declaration.Init);
+            AST_Factor? init = (declaration.Init != null) ? Resolve_Expression(declaration.Init) : declaration.Init;
 
             // Return new map and resolved declaration
             return new(uniqueName, init);
@@ -58,36 +58,41 @@ namespace myc
                 case AST_Expression aExpr:
                     return new AST_Expression(Resolve_Expression(aExpr.Expression));
                 default:
-                    throw new Exception("Resolve: Unexpected statement");
+                    return statement;
+                    // throw new Exception("Resolve: Unexpected statement");
             }
         }
 
-        private static AST_Factor Resolve_Expression(AST_Factor? factor)
+        private static AST_Factor Resolve_Expression(AST_Factor factor)
         {
             switch (factor)
             {
                 case AST_Assignment asmt:
                     return Resolve_Assignment(asmt);
                 case AST_Var var:
-                    if (variableMap.ContainsKey(var.Identifier.Name))
+                    bool definedVar = variableMap.TryGetValue(var.Identifier.Name, out string? uniqueName);
+                    if (!definedVar || uniqueName == null)
                     {
                         throw new Exception(
-                            string.Format("Resolve: Undefined Variable: {0}",var.Identifier.Name)
+                            string.Format("Resolve: Undefined Variable: {0}", var.Identifier.Name)
                         );
                     }
-                    return new AST_Var(new AST_Identifier(variableMap[var.Identifier.Name]));
+                    else
+                    {
+                        return new AST_Var(new AST_Identifier(uniqueName));
+                    }
                 case AST_Unary unary:
                     return new AST_Unary(unary.UnaryOp, Resolve_Expression(unary.Factor));
                 case AST_Binary binary:
                     return new AST_Binary(
-                        Resolve_Expression(binary.LeftFactor), 
-                        binary.BinaryOp, 
+                        Resolve_Expression(binary.LeftFactor),
+                        binary.BinaryOp,
                         Resolve_Expression(binary.RightFactor)
                     );
                 case AST_Int constant:
                     return constant;
                 default:
-                    throw new Exception("Resolve: unknown expression found");
+                    throw new Exception(string.Format("Resolve: unknown expression type found: {0}", factor?.GetType()));
 
             }
         }

@@ -5,6 +5,7 @@ namespace myc
         public string ProgramFile = "";
         public bool RunThruCodeGen;
         public bool RunThruParser;
+        public bool RunThruValidate;
         public bool RunThruLexer;
         public bool RunThruTac;
 
@@ -18,6 +19,7 @@ namespace myc
                 return
                     !this.RunThruLexer &&
                     !this.RunThruParser &&
+                    !this.RunThruValidate &&
                     !this.RunThruCodeGen &&
                     !this.RunThruTac;
             }

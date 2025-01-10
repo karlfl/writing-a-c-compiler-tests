@@ -36,6 +36,7 @@ internal class Program
                 RunThruCodeGen = args.Contains("--codegen"),
                 RunThruTac = args.Contains("--tacky"),
                 RunThruParser = args.Contains("--parse"),
+                RunThruValidate = args.Contains("--validate"),
                 RunThruLexer = args.Contains("--lex"),
                 DebugMode = args.Contains("--debug"),
             };

@@ -56,7 +56,13 @@ namespace myc
                 // If Only running Lexer and Parser then step out now
                 if (mySettings.RunThruParser) return;
 
-                TAC_Program tac_ast = TACGen.Generate(ast);
+                AST_Program validAST = SEM_Resolve.Resolve(ast);
+                Console.WriteLine("\n{0}",ast.Print());
+
+                // If Only running Validation and Parser then step out now
+                if (mySettings.RunThruValidate) return;
+
+                TAC_Program tac_ast = TACGen.Generate(validAST);
                 Console.WriteLine("\n{0}",tac_ast.Print());
 
                 // If Only running Lexer, Parser, CodeGen and TAC then step out now
