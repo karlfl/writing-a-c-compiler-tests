@@ -57,6 +57,15 @@ namespace myc
                     return new AST_Return(Resolve_Expression(aReturn.Expression));
                 case AST_Expression aExpr:
                     return new AST_Expression(Resolve_Expression(aExpr.Expression));
+                case AST_If aIf:
+                    AST_Statement? elseStmt =
+                        aIf.ElseStatement != null ?
+                        Resolve_Statement(aIf.ElseStatement) :
+                        null;
+                    return new AST_If(
+                        Resolve_Expression(aIf.Condition),
+                        Resolve_Statement(aIf.ThenStatement), 
+                        elseStmt);
                 default:
                     return statement;
                     // throw new Exception("Resolve: Unexpected statement");
@@ -88,6 +97,12 @@ namespace myc
                         Resolve_Expression(binary.LeftFactor),
                         binary.BinaryOp,
                         Resolve_Expression(binary.RightFactor)
+                    );
+                case AST_Conditional cond:
+                    return new AST_Conditional(
+                        Resolve_Expression(cond.Condition),
+                        Resolve_Expression(cond.ThenClause),
+                        Resolve_Expression(cond.ElseClause)
                     );
                 case AST_Int constant:
                     return constant;
