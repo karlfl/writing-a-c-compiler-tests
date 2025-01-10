@@ -61,4 +61,17 @@ namespace myc
         }
 
     }
+
+    public class AST_Conditional(AST_Factor cond, AST_Factor thenClause, AST_Factor elseClause) : AST_Factor
+    {
+        public readonly AST_Factor Condition = cond;
+        public readonly AST_Factor ThenClause = thenClause;
+        public readonly AST_Factor ElseClause = elseClause;
+
+        public override string Print()
+        {
+            return string.Format("({0} ? {1} : {2})", Condition.Print(), ThenClause.Print(), ElseClause.Print());
+        }
+
+    }
 }

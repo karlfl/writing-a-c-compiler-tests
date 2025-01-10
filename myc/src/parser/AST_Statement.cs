@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace myc
@@ -26,7 +27,27 @@ namespace myc
         }
     }
 
-    public class AST_Null() : AST_Statement {
+    public class AST_If(AST_Factor condition, AST_Statement thenStmt, AST_Statement? elseStmt) : AST_Statement
+    {
+        public readonly AST_Factor Condition = condition;
+        public readonly AST_Statement ThenStatement = thenStmt;
+        public readonly AST_Statement? ElseStatement = elseStmt;
+        public override string Print()
+        {
+            StringBuilder output = new();
+            output.AppendLine(string.Format("if ({0})", this.Condition.Print()));
+            output.AppendLine(string.Format("{{\n{0}\n}}", this.ThenStatement.Print()));
+            if (ElseStatement != null)
+            {
+                output.AppendLine("else");
+                output.AppendLine(string.Format("{{\n{0}\n}}", this.ElseStatement.Print()));
+            }
+            return output.ToString();
+        }
+    }
+
+    public class AST_Null() : AST_Statement
+    {
         public override string Print()
         {
             return "null";

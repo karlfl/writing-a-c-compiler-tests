@@ -131,6 +131,20 @@ namespace myc
                 case TokensEnum.Semicolon:
                     Expect(TokensEnum.Semicolon);
                     return new AST_Null();
+                case TokensEnum.KWIf:
+                    Expect(TokensEnum.KWIf);
+                    Expect(TokensEnum.OpenParen);
+                    AST_Factor cond = Parse_Expression(0);
+                    Expect(TokensEnum.CloseParen);
+                    AST_Statement thenStmt = Parse_Statement();
+                    TokensEnum elseToken = TokenStream.Peek_TokenEnum();
+                    AST_Statement? elseStmt = null;
+                    if (elseToken == TokensEnum.KWElse)
+                    {
+                        Expect(TokensEnum.KWElse);
+                        elseStmt = Parse_Statement();
+                    }
+                    return new AST_If(cond, thenStmt, elseStmt);
                 default:
                     AST_Factor expr = Parse_Expression(0);
                     Expect(TokensEnum.Semicolon);
@@ -149,22 +163,34 @@ namespace myc
             {
                 if (nextToken == TokensEnum.Assignment)
                 {
-                    _ = TokenStream.Get_Token();  //consume the '=' token
+                    Expect(TokensEnum.Assignment);  //consume the '=' token
                     AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken));
-
                     leftFactor = new AST_Assignment(leftFactor, rightFactor);
+                }
+                else if (nextToken == TokensEnum.QuestionMark)
+                {
+                    AST_Factor middleFactor = Parse_ConditionalMiddle();
+                    AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken));
+                    leftFactor = new AST_Conditional(leftFactor, rightFactor, middleFactor);
                 }
                 else
                 {
                     AST_BinaryOp oper = Parse_BinaryOp();
                     AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken) + 1);
-
                     leftFactor = new AST_Binary(leftFactor, oper, rightFactor);
                 }
                 //Peek to see what the next token is
                 nextToken = TokenStream.Peek_TokenEnum();
             }
             return leftFactor;
+        }
+
+        private AST_Factor Parse_ConditionalMiddle()
+        {
+            Expect(TokensEnum.QuestionMark);
+            AST_Factor middle = Parse_Expression(0);
+            Expect(TokensEnum.Colon);
+            return middle;
         }
 
         public AST_Factor Parse_Factor()
@@ -277,6 +303,8 @@ namespace myc
                 TokensEnum.LogicalAND => 10,
 
                 TokensEnum.LogicalOR => 5,
+
+                TokensEnum.QuestionMark => 3,
 
                 TokensEnum.Assignment => 1,
 
