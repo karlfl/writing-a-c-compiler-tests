@@ -86,7 +86,8 @@ namespace myc
                 case AST_Var var:
                     if (varMap.Exists(a => a.Name == var.Identifier.Name))
                     {
-                        return new AST_Var(new AST_Identifier(varMap.Find(a => a.Name == var.Identifier.Name).UniqueName));
+                        string newVarName = varMap.Find(a => a.Name == var.Identifier.Name).UniqueName;
+                        return new AST_Var(new AST_Identifier(newVarName));
                     }
                     else
                     {
