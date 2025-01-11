@@ -13,7 +13,7 @@ namespace myc
 
         public override string Print()
         {
-            return string.Format("return({0})", this.Expression.Print());
+            return string.Format("return({0})", Expression.Print());
         }
     }
 
@@ -23,7 +23,7 @@ namespace myc
 
         public override string Print()
         {
-            return string.Format("{0}", this.Expression.Print());
+            return string.Format("{0}", Expression.Print());
         }
     }
 
@@ -35,17 +35,25 @@ namespace myc
         public override string Print()
         {
             StringBuilder output = new();
-            output.AppendLine(string.Format("if ({0})", this.Condition.Print()));
-            output.AppendLine(string.Format("{{\n{0}\n}}", this.ThenStatement.Print()));
+            output.AppendLine(string.Format("if ({0})", Condition.Print()));
+            output.AppendLine(string.Format("{{\n{0}\n}}", ThenStatement.Print()));
             if (ElseStatement != null)
             {
                 output.AppendLine("else");
-                output.AppendLine(string.Format("{{\n{0}\n}}", this.ElseStatement.Print()));
+                output.AppendLine(string.Format("{{\n{0}\n}}", ElseStatement.Print()));
             }
             return output.ToString();
         }
     }
 
+    public class AST_Compound(AST_Block block) : AST_Statement
+    {
+        public readonly AST_Block Block = block;
+        public override string Print()
+        {
+            return string.Format("{0}", Block.Print());
+        }
+    }
     public class AST_Null() : AST_Statement
     {
         public override string Print()

@@ -45,36 +45,9 @@ namespace myc
             Expect(TokensEnum.OpenParen);
             Expect(TokensEnum.KWVoid);
             Expect(TokensEnum.CloseParen);
-            Expect(TokensEnum.OpenBrace);
 
-            TokensEnum nextToken = TokenStream.Peek_TokenEnum();
-
-            List<AST_BlockItem> blockItems = [];
-            while (nextToken != TokensEnum.CloseBrace)
-            {
-                blockItems.Add(Parse_BlockItem());
-                nextToken = TokenStream.Peek_TokenEnum();
-            }
-            // AST_Statement stmt = Parse_Statement();
-            Expect(TokensEnum.CloseBrace);
-
-            return new(ident, blockItems);
+            return new(ident, Parse_Block());
         }
-
-        public AST_BlockItem Parse_BlockItem()
-        {
-            TokensEnum token = TokenStream.Peek_TokenEnum();
-
-            switch (token)
-            {
-                case TokensEnum.KWInt:
-                    return new AST_BlockDeclaration(Parse_Declaration());
-                default:
-                    return new AST_BlockStatement(Parse_Statement());
-            }
-
-        }
-
 
         //(* <declaration> ::= "int" <identifier> [ "=" <exp> ] ";" *)
         public AST_Declaration Parse_Declaration()
@@ -145,6 +118,8 @@ namespace myc
                         elseStmt = Parse_Statement();
                     }
                     return new AST_If(cond, thenStmt, elseStmt);
+                case TokensEnum.OpenBrace:
+                    return new AST_Compound(Parse_Block());
                 default:
                     AST_Factor expr = Parse_Expression(0);
                     Expect(TokensEnum.Semicolon);
@@ -254,7 +229,6 @@ namespace myc
             };
         }
 
-
         public AST_BinaryOp Parse_BinaryOp()
         {
             string? token = TokenStream.Get_Token();
@@ -280,6 +254,38 @@ namespace myc
                 _ => throw new Exception(string.Format("Invalid Binary Op Token: {0}", keyToken)),
             };
         }
+
+        public AST_Block Parse_Block()
+        {
+            Expect(TokensEnum.OpenBrace);
+            TokensEnum nextToken = TokenStream.Peek_TokenEnum();
+            List<AST_BlockItem> blockItems = [];
+            while (nextToken != TokensEnum.CloseBrace)
+            {
+                blockItems.Add(Parse_BlockItem());
+                nextToken = TokenStream.Peek_TokenEnum();
+            }
+            // AST_Statement stmt = Parse_Statement();
+            Expect(TokensEnum.CloseBrace);
+
+            return new(blockItems);
+
+        }
+
+        public AST_BlockItem Parse_BlockItem()
+        {
+            TokensEnum token = TokenStream.Peek_TokenEnum();
+
+            switch (token)
+            {
+                case TokensEnum.KWInt:
+                    return new AST_BlockDeclaration(Parse_Declaration());
+                default:
+                    return new AST_BlockStatement(Parse_Statement());
+            }
+
+        }
+
 
         private static int GetPrecedence(TokensEnum opToken)
         {

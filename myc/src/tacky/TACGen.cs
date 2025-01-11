@@ -14,7 +14,7 @@ namespace myc
 
         static TAC_Function EmitFunction(AST_Function function)
         {
-            List<TAC_Instruction> instructions = EmitForStatements(function.Body);
+            List<TAC_Instruction> instructions = EmitForStatements(function.Body.Items);
             //Extra return;
             instructions.Add(new TAC_Return(new TAC_Constant(0)));
 

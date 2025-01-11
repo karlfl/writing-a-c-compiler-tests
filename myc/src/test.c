@@ -1,5 +1,10 @@
-int main(void) {
-    int a = 0;
-    a = 1 ? 2 : 3;
-    return a;
+int main(void)
+{
+    int x;
+    {
+        x = 3;
+    }
+    {
+        return x;
+    }
 }

@@ -12,13 +12,13 @@ namespace myc
 
         public static AST_Function Resolve_Function(AST_Function function)
         {
-            List<AST_BlockItem> newbody = [];
-            foreach (AST_BlockItem item in function.Body)
+            List<AST_BlockItem> newItems = [];
+            foreach (AST_BlockItem item in function.Body.Items)
             {
-                newbody.Add(Resolve_BlockItem(item));
+                newItems.Add(Resolve_BlockItem(item));
             }
 
-            return new AST_Function(function.Identifier, newbody);
+            return new AST_Function(function.Identifier, new AST_Block(newItems));
         }
 
         private static AST_BlockItem Resolve_BlockItem(AST_BlockItem item)
