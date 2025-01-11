@@ -1,10 +1,10 @@
-int main(void)
-{
-    int x;
+#ifdef SUPPRESS_WARNINGS
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+int main(void) {
+    int a = 3;
     {
-        x = 3;
-    }
-    {
-        return x;
+        int a = a = 4;
+        return a;
     }
 }
