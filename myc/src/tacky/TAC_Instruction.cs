@@ -91,7 +91,7 @@ namespace myc
 
         public override string Print()
         {
-            return string.Format("    Label({0})", this.Identifier);
+            return string.Format("Label({0})", this.Identifier);
         }
     }
 

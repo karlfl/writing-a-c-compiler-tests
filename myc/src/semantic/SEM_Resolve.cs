@@ -4,7 +4,7 @@ namespace myc
     {
         public static AST_Program Resolve(AST_Program program)
         {
-            VariableMap variableMap = []; //initial variable map for program scope
+            VariableMap variableMap = new(); //initial variable map for program scope
             return new AST_Program(Resolve_Function(program.Function, variableMap));
         }
 
@@ -36,7 +36,7 @@ namespace myc
 
         private static AST_Declaration Resolve_Declaration(AST_Declaration declaration, VariableMap varMap)
         {
-            if (varMap.Exists(a => a.Name == declaration.Name && a.InCurrentScope))
+            if (varMap.InCurrentScope(declaration.Name))
             {
                 throw new Exception("Resolve: Duplicate variable declaration");
             }
@@ -44,7 +44,7 @@ namespace myc
             // Generate a new unique variable name
             string uniqueName = Utilities.GenerateUniqueLabel(declaration.Name);
             // add it to the map and set the current scope = true
-            varMap.Add((declaration.Name, uniqueName, true));
+            varMap.Add(declaration.Name, uniqueName, true);
 
             // Resolve initializer if there is one
             AST_Factor? init = (declaration.Init != null) ? Resolve_Expression(declaration.Init, varMap) : declaration.Init;
@@ -63,7 +63,7 @@ namespace myc
                     return new AST_Expression(Resolve_Expression(aExpr.Expression, varMap));
                 case AST_Compound compound:
                     // New code block requires a new variable map since this is a new scope
-                    VariableMap newMap = varMap.MakeCopy(); 
+                    VariableMap newMap = varMap.MakeCopy();
                     return new AST_Compound(Resolve_Block(compound.Block, newMap));
                 case AST_If aIf:
                     AST_Statement? elseStmt = aIf.ElseStatement != null ? Resolve_Statement(aIf.ElseStatement, varMap) : null;
@@ -84,9 +84,9 @@ namespace myc
                 case AST_Assignment asmt:
                     return Resolve_Assignment(asmt, varMap);
                 case AST_Var var:
-                    if (varMap.Exists(a => a.Name == var.Identifier.Name))
+                    if (varMap.Exists(var.Identifier.Name))
                     {
-                        string newVarName = varMap.Find(a => a.Name == var.Identifier.Name).UniqueName;
+                        string newVarName = varMap.GetUniqueName(var.Identifier.Name);
                         return new AST_Var(new AST_Identifier(newVarName));
                     }
                     else

@@ -27,28 +27,37 @@ namespace myc
 
             foreach (AST_BlockItem blockItem in blockItems)
             {
-                switch (blockItem)
-                {
-                    case AST_BlockStatement statement:
-                        var stmtInstr = EmitForStatement(statement.Statement);
-                        instructions.AddRange(stmtInstr);
-                        break;
-                    case AST_BlockDeclaration declaration:
-                        switch (declaration.Declaration.Init)
-                        {
-                            case AST_Factor init:
-                                // treat declaration with initializer like an assignment expression
-                                AST_Assignment asmt = new(new AST_Var(new(declaration.Declaration.Name)), init);
-                                var (instr, _) = EmitForExpression(asmt);
-                                instructions.AddRange(instr);
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    default:
-                        throw new ArgumentException("TAC: Unexpected AST Block Item type");
-                }
+                instructions.AddRange(EmitForBlockItem(blockItem));
+            }
+
+            return instructions;
+        }
+
+        private static List<TAC_Instruction> EmitForBlockItem(AST_BlockItem blockItem)
+        {
+            List<TAC_Instruction> instructions = [];
+            
+            switch (blockItem)
+            {
+                case AST_BlockStatement statement:
+                    var stmtInstr = EmitForStatement(statement.Statement);
+                    instructions.AddRange(stmtInstr);
+                    break;
+                case AST_BlockDeclaration declaration:
+                    switch (declaration.Declaration.Init)
+                    {
+                        case AST_Factor init:
+                            // treat declaration with initializer like an assignment expression
+                            AST_Assignment asmt = new(new AST_Var(new(declaration.Declaration.Name)), init);
+                            var (instr, _) = EmitForExpression(asmt);
+                            instructions.AddRange(instr);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    throw new ArgumentException("TAC: Unexpected AST Block Item type");
             }
 
             return instructions;
@@ -71,8 +80,10 @@ namespace myc
                     instructions.AddRange(expInstr);
                     break;
                 case AST_If aIf:
-                    var ifInstr = EmitForIfStatement(aIf);
-                    instructions.AddRange(ifInstr);
+                    instructions.AddRange(EmitForIfStatement(aIf));
+                    break;
+                case AST_Compound aComp:
+                    instructions.AddRange(EmitForStatements(aComp.Block.Items));
                     break;
                 case AST_Null:
                     break;

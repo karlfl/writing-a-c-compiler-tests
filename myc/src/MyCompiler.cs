@@ -57,7 +57,7 @@ namespace myc
                 if (mySettings.RunThruParser) return;
 
                 AST_Program validAST = SEM_Resolve.Resolve(ast);
-                Console.WriteLine("\n{0}",ast.Print());
+                Console.WriteLine("\n{0}",validAST.Print());
 
                 // If Only running Validation and Parser then step out now
                 if (mySettings.RunThruValidate) return;
