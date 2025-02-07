@@ -36,7 +36,7 @@ namespace myc
         private static List<TAC_Instruction> EmitForBlockItem(AST_BlockItem blockItem)
         {
             List<TAC_Instruction> instructions = [];
-            
+
             switch (blockItem)
             {
                 case AST_BlockStatement statement:
@@ -44,20 +44,30 @@ namespace myc
                     instructions.AddRange(stmtInstr);
                     break;
                 case AST_BlockDeclaration declaration:
-                    switch (declaration.Declaration.Init)
-                    {
-                        case AST_Factor init:
-                            // treat declaration with initializer like an assignment expression
-                            AST_Assignment asmt = new(new AST_Var(new(declaration.Declaration.Name)), init);
-                            var (instr, _) = EmitForExpression(asmt);
-                            instructions.AddRange(instr);
-                            break;
-                        default:
-                            break;
-                    }
+                    instructions.AddRange(EmitForDeclaration(declaration.Declaration));
                     break;
                 default:
                     throw new ArgumentException("TAC: Unexpected AST Block Item type");
+            }
+
+            return instructions;
+        }
+
+        private static List<TAC_Instruction> EmitForDeclaration(AST_Declaration declaration)
+        {
+            List<TAC_Instruction> instructions = [];
+
+            switch (declaration.Init)
+            {
+                case AST_Factor init:
+                    // treat declaration with initializer like an assignment expression
+                    AST_Assignment asmt = new(new AST_Var(new(declaration.Name)), init);
+                    var (instr, _) = EmitForExpression(asmt);
+                    instructions.AddRange(instr);
+                    break;
+                default:
+                    // don't generate instructions for declaration without initializer
+                    break;
             }
 
             return instructions;
@@ -85,11 +95,98 @@ namespace myc
                 case AST_Compound aComp:
                     instructions.AddRange(EmitForStatements(aComp.Block.Items));
                     break;
+                case AST_Break aBreak:
+                    instructions.Add(new TAC_Jump(EmitBreakLabel(aBreak.Identifier)));
+                    break;
+                case AST_Continue aCont:
+                    instructions.Add(new TAC_Jump(EmitContinueLabel(aCont.Identifier)));
+                    break;
+                case AST_DoWhile aDo:
+                    instructions.AddRange(EmitDoLoop(aDo));
+                    break;
+                case AST_While aWhile:
+                    instructions.AddRange(EmitWhileLoop(aWhile));
+                    break;
+                case AST_For aFor:
+                    instructions.AddRange(EmitForLoop(aFor));
+                    break;
                 case AST_Null:
                     break;
                 default:
                     throw new ArgumentException(string.Format("TAC: Unexpected AST Expression type: {0}", statement.GetType()));
             }
+
+            return instructions;
+        }
+
+        private static List<TAC_Instruction> EmitDoLoop(AST_DoWhile doWhile)
+        {
+            List<TAC_Instruction> instructions = [];
+
+            TAC_Label startLabel = new(Utilities.GenerateUniqueLabel("do_loop_start"));
+            TAC_Label breakLabel = EmitBreakLabel(doWhile.Identifier);
+            TAC_Label continueLabel = EmitContinueLabel(doWhile.Identifier);
+            var (condInstr, value) = EmitForExpression(doWhile.Condition);
+            instructions.Add(startLabel);
+            instructions.AddRange(EmitForStatement(doWhile.Body));
+            instructions.Add(continueLabel);
+            instructions.AddRange(condInstr);
+            instructions.Add(new TAC_JumpNotZero(value, startLabel));
+            instructions.Add(breakLabel);
+
+            return instructions;
+        }
+
+        private static List<TAC_Instruction> EmitWhileLoop(AST_While aWhile)
+        {
+            List<TAC_Instruction> instructions = [];
+
+            TAC_Label continueLabel = EmitContinueLabel(aWhile.Identifier);
+            TAC_Label breakLabel = EmitBreakLabel(aWhile.Identifier);
+            var (condInstr, value) = EmitForExpression(aWhile.Condition);
+            instructions.Add(continueLabel);
+            instructions.AddRange(condInstr);
+            instructions.Add(new TAC_JumpIfZero(value, breakLabel));
+            instructions.AddRange(EmitForStatement(aWhile.Body));
+            instructions.Add(new TAC_Jump(continueLabel));
+            instructions.Add(breakLabel);
+
+            return instructions;
+        }
+
+        private static List<TAC_Instruction> EmitForLoop(AST_For aFor)
+        {
+            List<TAC_Instruction> instructions = [];
+
+            TAC_Label startLabel = new(Utilities.GenerateUniqueLabel("for_loop_start"));
+            TAC_Label continueLabel = EmitContinueLabel(aFor.Identifier);
+            TAC_Label breakLabel = EmitBreakLabel(aFor.Identifier);
+            //Loop Initialization
+            switch (aFor.Initialization)
+            {
+                case AST_InitDecl decl:
+                    instructions.AddRange(EmitForDeclaration(decl.Declaration));
+                    break;
+                case AST_InitExp expr:
+                    instructions.AddRange(EmitForExpressionOptional(expr.Expression));
+                    break;
+                default:
+                    break;
+            }
+            instructions.Add(startLabel);
+            // Test Condition
+            if(aFor.Condition != null) {
+                var (instr, value) = EmitForExpression(aFor.Condition);
+                instructions.AddRange(instr);
+                instructions.Add(new TAC_JumpIfZero(value, breakLabel));
+            }
+            instructions.AddRange(EmitForStatement(aFor.Body));
+            // Looping
+            instructions.Add(continueLabel);
+            instructions.AddRange(EmitForExpressionOptional(aFor.Post));
+            instructions.Add(new TAC_Jump(startLabel));
+            // End
+            instructions.Add(breakLabel);
 
             return instructions;
         }
@@ -128,6 +225,15 @@ namespace myc
             return instr;
         }
 
+        private static List<TAC_Instruction> EmitForExpressionOptional(AST_Factor? expression){
+            if (expression != null){
+                var(instr, _) = EmitForExpression(expression);
+                return instr;
+            } else {
+                return [];
+            }
+
+        }
         private static (List<TAC_Instruction> instructions, TAC_Value value) EmitForExpression(AST_Factor expression)
         {
             switch (expression)
@@ -297,6 +403,15 @@ namespace myc
             instr.Add(endLabel);
 
             return (instr, dst);
+        }
+
+        private static TAC_Label EmitContinueLabel(string id)
+        {
+            return new("continue." + id);
+        }
+        private static TAC_Label EmitBreakLabel(string id)
+        {
+            return new("break." + id);
         }
     }
 }

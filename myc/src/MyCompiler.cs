@@ -23,14 +23,17 @@ namespace myc
             Utilities.GCCPreprocessorCleanUp(mySettings.ProgramFile);
 
             //Assemble/Link only if no cmd line parms
-            if (mySettings.RunAssembleLink && !settings.DebugMode)
+            if (mySettings.RunAssembleLink)
             {
                 //Assemble and Link
                 Console.WriteLine("Assemble and Link {0}", mySettings.ProgramFile);
                 Utilities.AssembleAndLink(mySettings.ProgramFile);
 
-                //cleanup asm file
-                Utilities.AssembleAndLinkCleanUp(mySettings.ProgramFile);
+                if (!settings.DebugMode)
+                {
+                    //cleanup asm file
+                    Utilities.AssembleAndLinkCleanUp(mySettings.ProgramFile);
+                }
             }
 
             Console.WriteLine("\nComplete\n");
@@ -51,7 +54,7 @@ namespace myc
                 if (mySettings.RunThruLexer) return;
 
                 AST_Program ast = Parse.Process(tokens);
-                Console.WriteLine("\n{0}",ast.Print());
+                Console.WriteLine("\n{0}", ast.Print());
 
                 // If Only running Lexer and Parser then step out now
                 if (mySettings.RunThruParser) return;
@@ -61,13 +64,13 @@ namespace myc
                 AST_Program validAST = SEM_Resolve.Resolve(ast);
                 //  2. annotate loops and break/continue statements
                 AST_Program labelAST = SEM_LabelLoops.Label(validAST);
-                Console.WriteLine("\n{0}",labelAST.Print());
+                Console.WriteLine("\n{0}", labelAST.Print());
 
                 // If Only running Validation and Parser then step out now
                 if (mySettings.RunThruValidate) return;
 
-                TAC_Program tac_ast = TACGen.Generate(validAST);
-                Console.WriteLine("\n{0}",tac_ast.Print());
+                TAC_Program tac_ast = TACGen.Generate(labelAST);
+                Console.WriteLine("\n{0}", tac_ast.Print());
 
                 // If Only running Lexer, Parser, CodeGen and TAC then step out now
                 if (mySettings.RunThruTac) return;
