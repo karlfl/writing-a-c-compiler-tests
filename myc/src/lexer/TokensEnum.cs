@@ -34,6 +34,12 @@ namespace myc
         LessOrEqual,
         GreaterOrEqual,
         Assignment,
+        // (* Loops *)
+        Do,
+        While,
+        For,
+        Break,
+        Continue,
         //(* punctuation *)
         OpenParen,
         CloseParen,

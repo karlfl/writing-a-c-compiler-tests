@@ -39,6 +39,11 @@ namespace myc
             new("LessOrEqual",     @"<=",              (name)=>TokensEnum.LessOrEqual.ToString()),
             new("GreaterOrEqual",  @">=",              (name)=>TokensEnum.GreaterOrEqual.ToString()),
             new("Assignment",      @"=",               (name)=>TokensEnum.Assignment.ToString()),
+            new("Do",              @"do",              (name)=>TokensEnum.Do.ToString()),
+            new("While",           @"while",           (name)=>TokensEnum.While.ToString()),
+            new("For",             @"for",             (name)=>TokensEnum.For.ToString()),
+            new("Break",           @"break",           (name)=>TokensEnum.Break.ToString()),
+            new("Continue",        @"continue",        (name)=>TokensEnum.Continue.ToString()),
             new("?Cond",           @"\?",              (name)=>TokensEnum.QuestionMark.ToString()),
             new(":Cond",           @":",               (name)=>TokensEnum.Colon.ToString()),
        ];
