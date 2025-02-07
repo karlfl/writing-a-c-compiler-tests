@@ -61,20 +61,57 @@ namespace myc
                     return new AST_Return(Resolve_Expression(aReturn.Expression, varMap));
                 case AST_Expression aExpr:
                     return new AST_Expression(Resolve_Expression(aExpr.Expression, varMap));
-                case AST_Compound compound:
-                    // New code block requires a new variable map since this is a new scope
-                    VariableMap newMap = varMap.MakeCopy();
-                    return new AST_Compound(Resolve_Block(compound.Block, newMap));
                 case AST_If aIf:
                     AST_Statement? elseStmt = aIf.ElseStatement != null ? Resolve_Statement(aIf.ElseStatement, varMap) : null;
                     return new AST_If(
                         Resolve_Expression(aIf.Condition, varMap),
                         Resolve_Statement(aIf.ThenStatement, varMap),
                         elseStmt);
+                case AST_While aWhile:
+                    return new AST_While(
+                        Resolve_Expression(aWhile.Condition, varMap),
+                        Resolve_Statement(aWhile.Body, varMap),
+                        aWhile.Identifier
+                    );
+                case AST_DoWhile aDoWhile:
+                    return new AST_DoWhile(
+                        Resolve_Statement(aDoWhile.Body, varMap),
+                        Resolve_Expression(aDoWhile.Condition, varMap),
+                        aDoWhile.Identifier
+                    );
+                case AST_For aFor:
+                    VariableMap forVarMap = varMap.MakeCopy();   // For loops require their own variable map since this is a new scope
+                    AST_ForInit forInit = Resolve_ForInit(forVarMap, aFor.Initialization);
+                    return new AST_For(
+                        forInit,
+                        Resolve_OptExpression(aFor.Condition, forVarMap),
+                        Resolve_OptExpression(aFor.Post, forVarMap),
+                        Resolve_Statement(aFor.Body, forVarMap),
+                        aFor.Identifier
+                    );
+                case AST_Compound compound:
+                    // New code block requires a new variable map since this is a new scope
+                    VariableMap newMap = varMap.MakeCopy();
+                    return new AST_Compound(Resolve_Block(compound.Block, newMap));
                 default:
                     return statement;
                     // throw new Exception("Resolve: Unexpected statement");
             }
+        }
+
+        private static AST_ForInit Resolve_ForInit(VariableMap varMap, AST_ForInit initialization)
+        {
+            return initialization switch
+            {
+                AST_InitExp iExpr => new AST_InitExp(Resolve_OptExpression(iExpr.Expression, varMap)),
+                AST_InitDecl iDecl => new AST_InitDecl(Resolve_Declaration(iDecl.Declaration, varMap)),
+                _ => initialization,
+            };
+        }
+
+        private static AST_Factor? Resolve_OptExpression(AST_Factor? condition, VariableMap varMap)
+        {
+            return condition == null ? condition : Resolve_Expression(condition, varMap);
         }
 
         private static AST_Factor Resolve_Expression(AST_Factor factor, VariableMap varMap)

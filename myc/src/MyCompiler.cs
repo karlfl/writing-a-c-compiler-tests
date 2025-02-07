@@ -56,8 +56,12 @@ namespace myc
                 // If Only running Lexer and Parser then step out now
                 if (mySettings.RunThruParser) return;
 
+                // Semantic analysis has two steps:
+                //  1. resolve variables
                 AST_Program validAST = SEM_Resolve.Resolve(ast);
-                Console.WriteLine("\n{0}",validAST.Print());
+                //  2. annotate loops and break/continue statements
+                AST_Program labelAST = SEM_LabelLoops.Label(validAST);
+                Console.WriteLine("\n{0}",labelAST.Print());
 
                 // If Only running Validation and Parser then step out now
                 if (mySettings.RunThruValidate) return;
