@@ -10,7 +10,7 @@ namespace myc
 
         private static readonly TokenDef[] TokenDefs =
         [
-            new("Identifier",      @"[a-zA-Z_]\w*\b",  ConvertIdentifier),
+            new("Identifier",      @"[a-zA-Z_]\w*\b",  ConvertKeyWord),
             new("Constant",        @"[0-9]+\b",        ConvertInt),
             new("OpenParen",       @"\(",              (name)=>TokensEnum.OpenParen.ToString()),
             new("CloseParen",      @"\)",              (name)=>TokensEnum.CloseParen.ToString()),
@@ -39,11 +39,6 @@ namespace myc
             new("LessOrEqual",     @"<=",              (name)=>TokensEnum.LessOrEqual.ToString()),
             new("GreaterOrEqual",  @">=",              (name)=>TokensEnum.GreaterOrEqual.ToString()),
             new("Assignment",      @"=",               (name)=>TokensEnum.Assignment.ToString()),
-            new("Do",              @"do",              (name)=>TokensEnum.Do.ToString()),
-            new("While",           @"while",           (name)=>TokensEnum.While.ToString()),
-            new("For",             @"for",             (name)=>TokensEnum.For.ToString()),
-            new("Break",           @"break",           (name)=>TokensEnum.Break.ToString()),
-            new("Continue",        @"continue",        (name)=>TokensEnum.Continue.ToString()),
             new("?Cond",           @"\?",              (name)=>TokensEnum.QuestionMark.ToString()),
             new(":Cond",           @":",               (name)=>TokensEnum.Colon.ToString()),
        ];
@@ -69,7 +64,7 @@ namespace myc
                 // Console.WriteLine("longMatch.match.Value: {0}", longMatch.match.Value);
                 // Console.WriteLine("LongMatch.matchedToken {0}", longMatch.matchedToken.Name);
 
-                if(string.IsNullOrEmpty(longMatch.match.Value)){ throw new Exception(String.Format("Invalid Match Found '{0}'", longMatch.match.Value)); }
+                if (string.IsNullOrEmpty(longMatch.match.Value)) { throw new Exception(String.Format("Invalid Match Found '{0}'", longMatch.match.Value)); }
 
                 sourceTokens.AppendLine(longMatch.matchedToken.Converter(longMatch.match.Value) + ";");
 
@@ -82,7 +77,7 @@ namespace myc
             return sourceTokens.ToString();
         }
 
-        static string ConvertIdentifier(string name)
+        static string ConvertKeyWord(string name)
         {
             return name switch
             {
@@ -91,6 +86,11 @@ namespace myc
                 "void" => TokensEnum.KWVoid.ToString(),
                 "if" => TokensEnum.KWIf.ToString(),
                 "else" => TokensEnum.KWElse.ToString(),
+                "do" => TokensEnum.KWDo.ToString(),
+                "while" => TokensEnum.KWWhile.ToString(),
+                "for" => TokensEnum.KWFor.ToString(),
+                "break" => TokensEnum.KWBreak.ToString(),
+                "continue" => TokensEnum.KWContinue.ToString(),
                 _ => string.Format("{0} \"{1}\"", TokensEnum.Identifier.ToString(), name),
             };
         }

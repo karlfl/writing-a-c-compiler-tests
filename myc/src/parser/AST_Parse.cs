@@ -83,7 +83,8 @@ namespace myc
                )
             {
                 throw new Exception("Invalid Indentifier Token");
-            };
+            }
+            ;
             string name = ident[1].Replace("\"", "");
 
             return new(name);
@@ -101,9 +102,6 @@ namespace myc
                     AST_Factor retExpr = Parse_Expression(0);
                     Expect(TokensEnum.Semicolon);
                     return new AST_Return(retExpr);
-                case TokensEnum.Semicolon:
-                    Expect(TokensEnum.Semicolon);
-                    return new AST_Null();
                 case TokensEnum.KWIf:
                     Expect(TokensEnum.KWIf);
                     Expect(TokensEnum.OpenParen);
@@ -120,11 +118,77 @@ namespace myc
                     return new AST_If(cond, thenStmt, elseStmt);
                 case TokensEnum.OpenBrace:
                     return new AST_Compound(Parse_Block());
+                case TokensEnum.KWBreak:
+                    Expect(TokensEnum.KWBreak);
+                    Expect(TokensEnum.Semicolon);
+                    return new AST_Break("");
+                case TokensEnum.KWContinue:
+                    Expect(TokensEnum.KWContinue);
+                    Expect(TokensEnum.Semicolon);
+                    return new AST_Continue("");
+                case TokensEnum.KWWhile:
+                    Expect(TokensEnum.KWWhile);
+                    Expect(TokensEnum.OpenParen);
+                    AST_Factor whileCond = Parse_Expression(0);
+                    Expect(TokensEnum.CloseParen);
+                    AST_Statement whileBody = Parse_Statement();
+                    return new AST_While(whileCond, whileBody, "");
+                case TokensEnum.KWDo:
+                    Expect(TokensEnum.KWDo);
+                    AST_Statement doBody = Parse_Statement();
+                    Expect(TokensEnum.KWWhile);
+                    Expect(TokensEnum.OpenParen);
+                    AST_Factor doCond = Parse_Expression(0);
+                    Expect(TokensEnum.CloseParen);
+                    Expect(TokensEnum.Semicolon);
+                    return new AST_DoWhile(doBody, doCond, "");
+                case TokensEnum.KWFor:
+                    Expect(TokensEnum.KWFor);
+                    Expect(TokensEnum.OpenParen);
+                    AST_ForInit init = Parse_ForInit();
+                    AST_Factor? forCond = Parse_OptionalExpression(TokensEnum.Semicolon);
+                    AST_Factor? forPost = Parse_OptionalExpression(TokensEnum.CloseParen);
+                    AST_Statement forBody = Parse_Statement();
+                    return new AST_For(init, forCond, forPost, forBody, "");
+                case TokensEnum.Semicolon:
+                    Expect(TokensEnum.Semicolon);
+                    return new AST_Null();
                 default:
                     AST_Factor expr = Parse_Expression(0);
                     Expect(TokensEnum.Semicolon);
                     return new AST_Expression(expr);
-            };
+            }
+        }
+
+        private AST_ForInit Parse_ForInit()
+        {
+            TokensEnum token = TokenStream.Peek_TokenEnum();
+
+            switch (token)
+            {
+                case TokensEnum.KWInt:
+                    return new AST_InitDecl(Parse_Declaration());
+                default:
+                    AST_Factor? exp = Parse_OptionalExpression(TokensEnum.Semicolon);
+                    return new AST_InitExp(exp);
+            }
+        }
+
+        private AST_Factor? Parse_OptionalExpression(TokensEnum delimiter)
+        {
+            TokensEnum token = TokenStream.Peek_TokenEnum();
+
+            if (token == delimiter)
+            {
+                Expect(delimiter);
+                return null;
+            }
+            else
+            {
+                AST_Factor? exp = Parse_Expression(0);
+                Expect(delimiter);
+                return exp;
+            }
         }
 
         public AST_Factor Parse_Expression(int minPrecedence)

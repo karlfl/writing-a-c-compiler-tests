@@ -11,6 +11,11 @@ namespace myc
         KWVoid,
         KWIf,
         KWElse,
+        KWDo,
+        KWWhile,
+        KWFor,
+        KWBreak,
+        KWContinue,
         //(* Operators *)
         Tilde,
         Hyphen,
@@ -34,12 +39,6 @@ namespace myc
         LessOrEqual,
         GreaterOrEqual,
         Assignment,
-        // (* Loops *)
-        Do,
-        While,
-        For,
-        Break,
-        Continue,
         //(* punctuation *)
         OpenParen,
         CloseParen,
