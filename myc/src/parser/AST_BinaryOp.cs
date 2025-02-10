@@ -45,6 +45,46 @@ namespace myc
         }
     }
 
+    public class AST_AddEqual: AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "+=";
+        }
+    }
+
+    public class AST_SubtractEqual: AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "-=";
+        }
+    }
+
+    public class AST_MultiplyEqual: AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "*=";
+        }
+    }
+
+    public class AST_DivideEqual: AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return @"/=";
+        }
+    }
+
+    public class AST_ModEqual: AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "%=";
+        }
+    }
+
     public class AST_AND : AST_BinaryOp
     {
         public override string Print()
