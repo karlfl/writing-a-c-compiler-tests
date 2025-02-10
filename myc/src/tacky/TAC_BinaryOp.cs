@@ -40,7 +40,7 @@ namespace myc
             return "/";
         }
     }
-    public class TAC_Remainder : TAC_BinaryOp
+     public class TAC_Remainder : TAC_BinaryOp
     {
 
         public override string Print()
@@ -48,7 +48,47 @@ namespace myc
             return "%";
         }
     }
-    public class TAC_Equal : TAC_BinaryOp
+    public class TAC_AND : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "&";
+        }
+    }
+    public class TAC_OR : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "|";
+        }
+    }
+    public class TAC_XOR : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "^";
+        }
+    }
+    public class TAC_LeftShift : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return "<<";
+        }
+    }
+    public class TAC_RightShift : TAC_BinaryOp
+    {
+
+        public override string Print()
+        {
+            return ">>";
+        }
+    }
+   public class TAC_Equal : TAC_BinaryOp
     {
 
         public override string Print()

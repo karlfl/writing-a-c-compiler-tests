@@ -84,6 +84,9 @@ namespace myc
             {
                 case ASM_BinaryAdd:
                 case ASM_BinarySub:
+                case ASM_BitwiseAND:
+                case ASM_BitwiseOR:
+                case ASM_BitwiseXOR:
                     // fix up the Add/Sub statements that use stack for both operands
                     if (binary.Operand1.GetType() == typeof(ASM_Stack) &&
                         binary.Operand2.GetType() == typeof(ASM_Stack))
@@ -102,7 +105,7 @@ namespace myc
                     // fix up the Mult statements that use stack for second operand
                     if (binary.Operand2.GetType() == typeof(ASM_Stack))
                     {
-                        // Add a Mov instruction to use the R10 register for first operand
+                        // Add a Mov instruction to use the R11 register for first operand
                         fixedInstructions.Add(new ASM_Mov(binary.Operand2, new ASM_Register(new ASM_R11())));
                         fixedInstructions.Add(new ASM_Binary(binary.BinaryOp, binary.Operand1, new ASM_Register(new ASM_R11())));
                         fixedInstructions.Add(new ASM_Mov(new ASM_Register(new ASM_R11()), binary.Operand2));
@@ -112,6 +115,27 @@ namespace myc
                         //no changes needed just add it back
                         fixedInstructions.Add(binary);
                     }
+                    break;
+                case ASM_BitwiseLShift:
+                case ASM_BitwiseRShift:
+                    // fix up the Shift statements that use stack or constants for operands
+                    ASM_Operand newOp1 = binary.Operand1;
+                    ASM_Operand newOp2 = binary.Operand2;
+                    //Op1 can't use stack
+                    if (newOp1.GetType() == typeof(ASM_Stack))
+                    {
+                        // Add a Mov instruction to use the CL register for first operand
+                        newOp1 = new ASM_Register(new ASM_CL());
+                        fixedInstructions.Add(new ASM_Mov(binary.Operand1, newOp1));
+                    }
+                    // Op2 can't be a constant
+                    if (newOp2.GetType() == typeof(ASM_Imm))
+                    {
+                        // Add a Mov instruction to use the R10 register for second operand
+                        newOp2 = new ASM_Register(new ASM_R10());
+                        fixedInstructions.Add(new ASM_Mov(binary.Operand2, newOp2 ));
+                    }
+                    fixedInstructions.Add(new ASM_Binary(binary.BinaryOp, newOp1, newOp2));
                     break;
                 default:
                     //no changes needed just add it back

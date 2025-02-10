@@ -45,6 +45,45 @@ namespace myc
         }
     }
 
+    public class AST_AND : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "&";
+        }
+    }
+
+    public class AST_OR : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "|";
+        }
+    }
+
+    public class AST_XOR : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "^";
+        }
+    }
+
+    public class AST_LeftShift : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return "<<";
+        }
+    }
+
+    public class AST_RightShift : AST_BinaryOp
+    {
+        public override string Print()
+        {
+            return ">>";
+        }
+    }
     public class AST_LogicalAnd : AST_BinaryOp
     {
         public override string Print()

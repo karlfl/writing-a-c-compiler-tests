@@ -50,10 +50,23 @@ namespace myc
                     writer.WriteLine("\t{0} \t{1}", unaryOp, operand);
                     break;
                 case ASM_Binary binary:
-                    string binaryOp = ConvertBinaryOp(binary.BinaryOp);
-                    string binOper1 = ConvertOperand(binary.Operand1);
-                    string binOper2 = ConvertOperand(binary.Operand2);
-                    writer.WriteLine("\t{0} \t{1}, {2}", binaryOp, binOper1, binOper2);
+                    switch (binary.BinaryOp) {
+                        case ASM_BitwiseLShift:
+                        case ASM_BitwiseRShift:
+                            string shiftOp = ConvertBinaryOp(binary.BinaryOp);
+                            string shiftOper1 = ConvertOperand(binary.Operand2);
+                            // the Shift instructions work on byte operand (CL)
+                            string shiftOper2 = ConvertByteOperand(binary.Operand1);
+                            // Operands are in a different order for the Shift instructions
+                            writer.WriteLine("\t{0} \t{1}, {2}", shiftOp, shiftOper2, shiftOper1);
+                            break;
+                        default:
+                            string binaryOp = ConvertBinaryOp(binary.BinaryOp);
+                            string binOper1 = ConvertOperand(binary.Operand1);
+                            string binOper2 = ConvertOperand(binary.Operand2);
+                            writer.WriteLine("\t{0} \t{1}, {2}", binaryOp, binOper1, binOper2);
+                            break;
+                    }
                     break;
                 case ASM_Idiv iDiv:
                     string divOperand = ConvertOperand(iDiv.Operand);
@@ -113,6 +126,7 @@ namespace myc
                 {
                     // convert these to the one byte register
                     ASM_AX => "%al",
+                    ASM_CL => "%cl",
                     ASM_DX => "%dl",
                     ASM_R10 => "%r10b",
                     ASM_R11 => "%r11b",
@@ -131,6 +145,7 @@ namespace myc
                 ASM_Register register => register.Register switch
                 {
                     ASM_AX => "%eax",
+                    ASM_CL => "%ecx",
                     ASM_DX => "%edx",
                     ASM_R10 => "%r10d",
                     ASM_R11 => "%r11d",
@@ -159,6 +174,11 @@ namespace myc
                 ASM_BinaryAdd => "addl",
                 ASM_BinarySub => "subl",
                 ASM_BinaryMult => "imull",
+                ASM_BitwiseAND => "andl",
+                ASM_BitwiseOR => "orl",
+                ASM_BitwiseXOR => "xorl",
+                ASM_BitwiseLShift => "sall",
+                ASM_BitwiseRShift => "sarl",
                 _ => throw new InvalidOperationException("Unary Operand Not Defined for Conversion: {0}"),
             };
         }

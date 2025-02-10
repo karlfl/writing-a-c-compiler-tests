@@ -114,6 +114,11 @@ namespace myc
                 case TAC_Add:
                 case TAC_Subtract:
                 case TAC_Multiply:
+                case TAC_AND:
+                case TAC_OR:
+                case TAC_XOR:
+                case TAC_LeftShift:
+                case TAC_RightShift:
                     ASM_BinaryOp binOpr = ConvertBinaryOp(tBinary.BinaryOp);
                     instr.Add(new ASM_Mov(src1, dst));
                     instr.Add(new ASM_Binary(binOpr, src2, dst));
@@ -154,6 +159,11 @@ namespace myc
                 TAC_Add => new ASM_BinaryAdd(),
                 TAC_Subtract => new ASM_BinarySub(),
                 TAC_Multiply => new ASM_BinaryMult(),
+                TAC_AND => new ASM_BitwiseAND(),
+                TAC_OR => new ASM_BitwiseOR(),
+                TAC_XOR => new ASM_BitwiseXOR(),
+                TAC_LeftShift => new ASM_BitwiseLShift(),
+                TAC_RightShift => new ASM_BitwiseRShift(),
                 _ => throw new ArgumentException(string.Format("Unexpected TAC BinaryOp Type: {0}", binaryOp.GetType().Name)),
             };
         }

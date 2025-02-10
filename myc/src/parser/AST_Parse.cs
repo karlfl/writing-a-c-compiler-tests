@@ -307,6 +307,11 @@ namespace myc
                 TokensEnum.Asterisk => new AST_Multiply(),
                 TokensEnum.ForwardSlash => new AST_Divide(),
                 TokensEnum.Percent => new AST_Mod(),
+                TokensEnum.AND => new AST_AND(),
+                TokensEnum.OR => new AST_OR(),
+                TokensEnum.XOR => new AST_XOR(),
+                TokensEnum.LeftShift => new AST_LeftShift(),
+                TokensEnum.RightShift => new AST_RightShift(),
                 TokensEnum.LogicalAND => new AST_LogicalAnd(),
                 TokensEnum.LogicalOR => new AST_LogicalOr(),
                 TokensEnum.EqualEqual => new AST_Equal(),
@@ -362,6 +367,9 @@ namespace myc
                 TokensEnum.Plus or
                 TokensEnum.Hyphen => 45,
 
+                TokensEnum.LeftShift or
+                TokensEnum.RightShift => 40,
+
                 TokensEnum.LessThan or
                 TokensEnum.GreaterThan or
                 TokensEnum.LessOrEqual or
@@ -369,6 +377,10 @@ namespace myc
 
                 TokensEnum.EqualEqual or
                 TokensEnum.NotEqual => 30,
+
+                TokensEnum.AND => 25,
+                TokensEnum.XOR => 20,
+                TokensEnum.OR => 15,
 
                 TokensEnum.LogicalAND => 10,
 
