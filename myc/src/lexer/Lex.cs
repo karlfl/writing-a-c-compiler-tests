@@ -102,6 +102,7 @@ namespace myc
                 "for" => TokensEnum.KWFor.ToString(),
                 "break" => TokensEnum.KWBreak.ToString(),
                 "continue" => TokensEnum.KWContinue.ToString(),
+                "goto" => TokensEnum.KWGoto.ToString(),
                 _ => string.Format("{0} \"{1}\"", TokensEnum.Identifier.ToString(), name),
             };
         }

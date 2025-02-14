@@ -16,6 +16,7 @@ namespace myc
         KWFor,
         KWBreak,
         KWContinue,
+        KWGoto,
         //(* Operators *)
         Tilde,
         Hyphen,
@@ -56,7 +57,7 @@ namespace myc
         OpenBrace,
         CloseBrace,
         Semicolon,
-        QuestionMark,
-        Colon
+        Colon,
+        QuestionMark
     }
 }
