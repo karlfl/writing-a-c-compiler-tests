@@ -17,14 +17,15 @@ namespace myc
         }
     }
 
-    public class AST_Var(AST_Identifier identifier) : AST_Factor{
+    public class AST_Var(AST_Identifier identifier) : AST_Factor
+    {
         public readonly AST_Identifier Identifier = identifier;
         public override string Print()
         {
-            return string.Format("{0}", this.Identifier.Name);  
+            return string.Format("{0}", this.Identifier.Name);
         }
     }
-    
+
     public class AST_Unary(AST_UnaryOp unOp, AST_Factor factor) : AST_Factor
     {
         public readonly AST_UnaryOp UnaryOp = unOp;
@@ -46,6 +47,22 @@ namespace myc
         public override string Print()
         {
             return string.Format("({0} {1} {2})", LeftFactor.Print(), BinaryOp.Print(), RightFactor.Print());
+        }
+
+    }
+
+    public class AST_IncDec(AST_BinaryOp binOp, AST_Factor factor, bool PrefixOp) : AST_Factor
+    {
+        public readonly AST_Factor Factor = factor;
+        public readonly AST_BinaryOp BinaryOp = binOp;
+        public readonly bool PrefixOp = PrefixOp;
+
+        public override string Print()
+        {
+
+            return PrefixOp ?
+                    string.Format("({0}{0}{1})", BinaryOp.Print(), Factor.Print()) :
+                    string.Format("({0}{1}{1})", Factor.Print(), BinaryOp.Print());
         }
 
     }

@@ -148,6 +148,11 @@ namespace myc
                     );
                 case AST_Int constant:
                     return constant;
+                case AST_IncDec incDec:
+                    return new AST_IncDec(
+                        incDec.BinaryOp,
+                        Resolve_Expression(incDec.Factor, varMap),
+                        incDec.PrefixOp);
                 default:
                     throw new Exception(string.Format("Resolve: unknown expression type found: {0}", factor?.GetType()));
 

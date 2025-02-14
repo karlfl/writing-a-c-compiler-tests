@@ -82,7 +82,7 @@ namespace myc
                 ident[0] != TokensEnum.Identifier.ToString()
                )
             {
-                throw new Exception("Invalid Indentifier Token");
+                throw new Exception(string.Format("Invalid Indentifier Token: {0}", token));
             }
             ;
             string name = ident[1].Replace("\"", "");
@@ -200,23 +200,37 @@ namespace myc
             // Parse expression loop
             while (GetPrecedence(nextToken) >= minPrecedence)
             {
-                if (nextToken == TokensEnum.Assignment)
+                switch (nextToken)
                 {
-                    Expect(TokensEnum.Assignment);  //consume the '=' token
-                    AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken));
-                    leftFactor = new AST_Assignment(leftFactor, rightFactor);
-                }
-                else if (nextToken == TokensEnum.QuestionMark)
-                {
-                    AST_Factor middleFactor = Parse_ConditionalMiddle();
-                    AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken));
-                    leftFactor = new AST_Conditional(leftFactor, middleFactor, rightFactor);
-                }
-                else
-                {
-                    AST_BinaryOp oper = Parse_BinaryOp();
-                    AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken) + 1);
-                    leftFactor = new AST_Binary(leftFactor, oper, rightFactor);
+                    case TokensEnum.Assignment:
+                    case TokensEnum.PlusEqual:
+                    case TokensEnum.HyphenEqual:
+                    case TokensEnum.AsteriskEqual:
+                    case TokensEnum.ForwardSlashEqual:
+                    case TokensEnum.PercentEqual:
+                    case TokensEnum.ANDEqual:
+                    case TokensEnum.OREqual:
+                    case TokensEnum.XOREqual:
+                    case TokensEnum.LeftShiftEqual:
+                    case TokensEnum.RightShiftEqual:
+                        {
+                            leftFactor = Parse_Assignment(leftFactor, nextToken);
+                            break;
+                        }
+                    case TokensEnum.QuestionMark:
+                        {
+                            AST_Factor middleFactor = Parse_ConditionalMiddle();
+                            AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken));
+                            leftFactor = new AST_Conditional(leftFactor, middleFactor, rightFactor);
+                            break;
+                        }
+                    default:
+                        {
+                            AST_BinaryOp oper = Parse_BinaryOp();
+                            AST_Factor rightFactor = Parse_Expression(GetPrecedence(nextToken) + 1);
+                            leftFactor = new AST_Binary(leftFactor, oper, rightFactor);
+                            break;
+                        }
                 }
                 //Peek to see what the next token is
                 nextToken = TokenStream.Peek_TokenEnum();
@@ -235,28 +249,59 @@ namespace myc
         public AST_Factor Parse_Factor()
         {
             TokensEnum keyToken = TokenStream.Peek_TokenEnum();
+            AST_Factor factor;
 
             switch (keyToken)
             {
                 case TokensEnum.Constant:
-                    return Parse_Constant();
+                    factor = Parse_Constant();
+                    break;
                 case TokensEnum.Identifier:
-                    return new AST_Var(Parse_Identifier());
+                    factor = new AST_Var(Parse_Identifier());
+                    break;
                 case TokensEnum.Tilde:
                 case TokensEnum.Hyphen:
                 case TokensEnum.LogicalNOT:
                     AST_UnaryOp unOp = Parse_UnaryOp();
                     AST_Factor unaryInnerExp = Parse_Factor();
-                    return new AST_Unary(unOp, unaryInnerExp);
+                    factor = new AST_Unary(unOp, unaryInnerExp);
+                    break;
                 case TokensEnum.OpenParen:
                     _ = TokenStream.Get_Token();  //consume the '('
-                    AST_Factor innerExp = Parse_Expression(0);
+                    factor = Parse_Expression(0);
                     Expect(TokensEnum.CloseParen); //consime the ')'
-                    return innerExp;
+                    break;
+                case TokensEnum.DoubleHyphen:
+                case TokensEnum.DoublePlus:
+                    // Handle prefix increment/decrement
+                    AST_BinaryOp preOp = Parse_BinaryOp();
+                    //Expect a factor next (most often a variable)
+                    AST_Factor afactor = Parse_Factor();
+                    if (typeof(AST_Var).Name == afactor.GetType().Name)
+                    {
+                        factor = new AST_IncDec(preOp, afactor, true);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Invalid Increment/Decrement Token: {0}", afactor));
+                    }
+                    break;
                 default:
                     throw new Exception(string.Format("Invalid Expression Token: {0}", keyToken));
 
             }
+
+            //look forward to see if there is an increment or decrement suffix
+            TokensEnum nextToken = TokenStream.Peek_TokenEnum();
+            if (
+                nextToken == TokensEnum.DoubleHyphen ||
+                nextToken == TokensEnum.DoublePlus)
+            {
+                AST_BinaryOp postOp = Parse_BinaryOp();
+                factor = new AST_IncDec(postOp, factor, false);
+            }
+
+            return factor;
         }
 
         public AST_Int Parse_Constant()
@@ -277,6 +322,37 @@ namespace myc
             }
         }
 
+        public AST_Assignment Parse_Assignment(AST_Factor leftFactor, TokensEnum keyToken)
+        {
+            // get/consume the current token
+            AST_Assignment leftAssigment;
+            switch (keyToken)
+            {
+                case TokensEnum.Assignment:
+                    {
+                        // consume the '=' token
+                        Expect(TokensEnum.Assignment);
+                        AST_Factor rightFactor = Parse_Expression(GetPrecedence(keyToken));
+                        leftAssigment = new AST_Assignment(leftFactor, rightFactor);
+                        break;
+                    }
+                default:
+                    {
+                        // This is a compound binary op with an assignment;
+                        //consume the 'x=' token (+=, -=, etc.)
+                        AST_BinaryOp binOp = Parse_BinaryOp();
+                        AST_Factor rightFactor = Parse_Expression(GetPrecedence(keyToken));
+                        // Build the binary expression 
+                        AST_Factor binFactor = new AST_Binary(leftFactor, binOp, rightFactor);
+                        // Build the assigment fusing Right Precence
+                        leftAssigment = new AST_Assignment(leftFactor, binFactor);
+                        break;
+                    }
+            }
+            return leftAssigment;
+
+        }
+
         public AST_UnaryOp Parse_UnaryOp()
         {
             string? token = TokenStream.Get_Token();
@@ -295,28 +371,46 @@ namespace myc
 
         public AST_BinaryOp Parse_BinaryOp()
         {
+            // Consume the binary operation
             string? token = TokenStream.Get_Token();
             string[] tokenParts = token.Split(' ');
             TokensEnum keyToken = Enum.Parse<TokensEnum>(tokenParts[0]);
-            // _ = Enum.TryParse(tokenParts[0], out TokensEnum keyToken);
 
             return keyToken switch
             {
-                TokensEnum.Plus => new AST_Add(),
-                TokensEnum.Hyphen => new AST_Subtract(),
-                TokensEnum.Asterisk => new AST_Multiply(),
-                TokensEnum.ForwardSlash => new AST_Divide(),
-                TokensEnum.Percent => new AST_Mod(),
-                TokensEnum.PlusEqual=> new AST_AddEqual(),
-                TokensEnum.HyphenEqual => new AST_SubtractEqual(),
-                TokensEnum.AsteriskEqual => new AST_MultiplyEqual(),
-                TokensEnum.ForwardSlashEqual => new AST_DivideEqual(),
-                TokensEnum.PercentEqual => new AST_ModEqual(),
-                TokensEnum.AND => new AST_AND(),
-                TokensEnum.OR => new AST_OR(),
-                TokensEnum.XOR => new AST_XOR(),
-                TokensEnum.LeftShift => new AST_LeftShift(),
-                TokensEnum.RightShift => new AST_RightShift(),
+                TokensEnum.Plus or
+                TokensEnum.PlusEqual => new AST_Add(),
+
+                TokensEnum.Hyphen or
+                TokensEnum.HyphenEqual => new AST_Subtract(),
+
+                TokensEnum.Asterisk or
+                TokensEnum.AsteriskEqual => new AST_Multiply(),
+
+                TokensEnum.ForwardSlash or
+                TokensEnum.ForwardSlashEqual => new AST_Divide(),
+
+                TokensEnum.Percent or
+                TokensEnum.PercentEqual => new AST_Mod(),
+
+                TokensEnum.AND or
+                TokensEnum.ANDEqual => new AST_AND(),
+
+                TokensEnum.OR or
+                TokensEnum.OREqual => new AST_OR(),
+
+                TokensEnum.XOR or
+                TokensEnum.XOREqual => new AST_XOR(),
+
+                TokensEnum.LeftShift or
+                TokensEnum.LeftShiftEqual => new AST_LeftShift(),
+
+                TokensEnum.RightShift or
+                TokensEnum.RightShiftEqual => new AST_RightShift(),
+
+                TokensEnum.DoubleHyphen => new AST_Subtract(),
+                TokensEnum.DoublePlus => new AST_Add(),
+
                 TokensEnum.LogicalAND => new AST_LogicalAnd(),
                 TokensEnum.LogicalOR => new AST_LogicalOr(),
                 TokensEnum.EqualEqual => new AST_Equal(),
@@ -365,6 +459,9 @@ namespace myc
         {
             return opToken switch
             {
+                TokensEnum.DoublePlus or
+                TokensEnum.DoubleHyphen => 55,
+
                 TokensEnum.Asterisk or
                 TokensEnum.ForwardSlash or
                 TokensEnum.Percent => 50,
@@ -393,7 +490,18 @@ namespace myc
 
                 TokensEnum.QuestionMark => 3,
 
-                TokensEnum.Assignment => 1,
+                TokensEnum.Assignment or
+                TokensEnum.PlusEqual or
+                TokensEnum.HyphenEqual or
+                TokensEnum.AsteriskEqual or
+                TokensEnum.ForwardSlashEqual or
+                TokensEnum.PercentEqual or
+                TokensEnum.ANDEqual or
+                TokensEnum.OREqual or
+                TokensEnum.XOREqual or
+                TokensEnum.LeftShiftEqual or
+                TokensEnum.RightShiftEqual
+                 => 1,
 
                 _ => -1,
             };

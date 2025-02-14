@@ -12,7 +12,7 @@
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole", 
-            "args": ["--codegen", "${workspaceFolder}/myc/src/test.c"],
+            "args": ["--parse", "${workspaceFolder}/myc/src/test.c"],
             // "preLaunchTask": "dotnet: build ${workspaceFolder}/myc/bin/Debug/net8.0/myc"
         }
     ]

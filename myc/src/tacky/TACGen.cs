@@ -175,7 +175,8 @@ namespace myc
             }
             instructions.Add(startLabel);
             // Test Condition
-            if(aFor.Condition != null) {
+            if (aFor.Condition != null)
+            {
                 var (instr, value) = EmitForExpression(aFor.Condition);
                 instructions.AddRange(instr);
                 instructions.Add(new TAC_JumpIfZero(value, breakLabel));
@@ -225,11 +226,15 @@ namespace myc
             return instr;
         }
 
-        private static List<TAC_Instruction> EmitForExpressionOptional(AST_Factor? expression){
-            if (expression != null){
-                var(instr, _) = EmitForExpression(expression);
+        private static List<TAC_Instruction> EmitForExpressionOptional(AST_Factor? expression)
+        {
+            if (expression != null)
+            {
+                var (instr, _) = EmitForExpression(expression);
                 return instr;
-            } else {
+            }
+            else
+            {
                 return [];
             }
 
@@ -250,6 +255,8 @@ namespace myc
                     return EmitAssignment(asmt);
                 case AST_Conditional cond:
                     return EmitForCondAssignment(cond);
+                case AST_IncDec incDec:
+                    return EmitForIncrementDecrement(incDec);
                 default:
                     throw new ArgumentException(string.Format("TAC: Unexpected AST Expression type: {0}", expression.GetType()));
             }
@@ -368,7 +375,7 @@ namespace myc
                 AST_LessOrEqual => new TAC_LessOrEqual(),
                 AST_GreaterThan => new TAC_GreaterThan(),
                 AST_GreaterOrEqual => new TAC_GreaterOrEqual(),
-                _ => throw new ArgumentException("Unexpected AST Binary Operation"),
+                _ => throw new ArgumentException(String.Format("Unexpected AST Binary Operation: {0}", binaryOp)),
             };
         }
 
@@ -408,6 +415,40 @@ namespace myc
             instr.Add(endLabel);
 
             return (instr, dst);
+        }
+
+        private static (List<TAC_Instruction> instructions, TAC_Value value) EmitForIncrementDecrement(AST_IncDec incDec)
+        {
+            // Get the instructions and resulting value location for the inc/dec variable
+            //var (factInstr, value) = EmitForExpression(incDec.Factor);
+            if (incDec.PrefixOp)
+            {
+                //inc/dec first 
+                var (binInst, binValue) = EmitBinary(new AST_Binary(incDec.Factor, incDec.BinaryOp, new AST_Int(1)));
+                // set the original Value to the new value
+                var( facInst, dst) = EmitForExpression(incDec.Factor);
+                binInst.AddRange(facInst);
+                binInst.Add(new TAC_Copy(binValue, dst));
+                //return instructions and original factor
+                return (binInst, dst);
+            }
+            else
+            {
+                List<TAC_Instruction> instr = [];
+                //Copy orig value to temp
+                TAC_Variable origTempVar = new(Utilities.GenerateUniqueId());
+                var (facInst, factorVar) = EmitForExpression(incDec.Factor);
+                instr.AddRange(facInst);
+                instr.Add(new TAC_Copy(factorVar, origTempVar));
+                // increment/decrement
+                var (binInst, binValue) = EmitBinary(new AST_Binary(incDec.Factor, incDec.BinaryOp, new AST_Int(1)));
+                instr.AddRange(binInst);
+                // set the original Value to the new value
+                TAC_Variable dst = new(((AST_Var)incDec.Factor).Identifier.Name);
+                instr.Add(new TAC_Copy(binValue, dst));
+                // Return instructions and orig value temp
+                return (instr, origTempVar);
+            }
         }
 
         private static TAC_Label EmitContinueLabel(string id)
