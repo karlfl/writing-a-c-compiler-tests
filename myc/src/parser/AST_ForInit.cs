@@ -4,9 +4,9 @@ namespace myc {
         public abstract string Print();
     }
 
-    public class AST_InitDecl(AST_Declaration declaration) : AST_ForInit
+    public class AST_InitDecl(AST_Decl declaration) : AST_ForInit
     {
-        public readonly AST_Declaration Declaration = declaration;
+        public readonly AST_Decl Declaration = declaration;
 
         public override string Print()
         {

@@ -50,7 +50,7 @@ namespace myc
         }
 
         //(* <declaration> ::= "int" <identifier> [ "=" <exp> ] ";" *)
-        public AST_Declaration Parse_Declaration()
+        public AST_Decl Parse_Declaration()
         {
             Expect(TokensEnum.KWInt);
             AST_Identifier ident = Parse_Identifier();
@@ -60,17 +60,16 @@ namespace myc
             switch (keyToken)
             {
                 case TokensEnum.Semicolon:
-                    init_exp = null;
-                    break;
+                    return new AST_Declaration(ident.Name, null);
                 case TokensEnum.Assignment:
                     init_exp = Parse_Expression(0);
                     Expect(TokensEnum.Semicolon);
-                    break;
+                    return new AST_Declaration(ident.Name, init_exp);
+                case TokensEnum.Colon:
+                    return new AST_Label(ident.Name);
                 default:
                     throw new Exception(string.Format("Invalid Decaration Token: {0}", keyToken));
             }
-
-            return new(ident.Name, init_exp);
         }
 
         public AST_Identifier Parse_Identifier()

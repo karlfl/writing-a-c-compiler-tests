@@ -34,11 +34,11 @@ namespace myc
             };
         }
 
-        private static AST_Declaration Resolve_Declaration(AST_Declaration declaration, VariableMap varMap)
+        private static AST_Decl Resolve_Declaration(AST_Decl declaration, VariableMap varMap)
         {
             if (varMap.InCurrentScope(declaration.Name))
             {
-                throw new Exception("Resolve: Duplicate variable declaration");
+                throw new Exception(string.Format("Resolve: Duplicate declaration: {0}", declaration.Name));
             }
 
             // Generate a new unique variable name
@@ -46,11 +46,16 @@ namespace myc
             // add it to the map and set the current scope = true
             varMap.Add(declaration.Name, uniqueName, true);
 
-            // Resolve initializer if there is one
-            AST_Factor? init = (declaration.Init != null) ? Resolve_Expression(declaration.Init, varMap) : declaration.Init;
-
-            // Return new resolved declaration
-            return new(uniqueName, init);
+            switch(declaration){
+                case AST_Declaration decl:
+                    // Resolve initializer if there is one
+                    AST_Factor? init = (decl.Init != null) ? Resolve_Expression(decl.Init, varMap) : decl.Init;
+                    return new AST_Declaration(uniqueName, init);
+                case AST_Label:
+                    return new AST_Label(uniqueName);
+                default:
+                    throw new Exception(string.Format("Resolve: Invalid AST Declaration type: {0}", declaration.GetType()));
+            }
         }
 
         private static AST_Statement Resolve_Statement(AST_Statement statement, VariableMap varMap)

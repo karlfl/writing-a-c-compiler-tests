@@ -53,20 +53,28 @@ namespace myc
             return instructions;
         }
 
-        private static List<TAC_Instruction> EmitForDeclaration(AST_Declaration declaration)
+        private static List<TAC_Instruction> EmitForDeclaration(AST_Decl declaration)
         {
             List<TAC_Instruction> instructions = [];
 
-            switch (declaration.Init)
+            switch (declaration)
             {
-                case AST_Factor init:
-                    // treat declaration with initializer like an assignment expression
-                    AST_Assignment asmt = new(new AST_Var(new(declaration.Name)), init);
-                    var (instr, _) = EmitForExpression(asmt);
-                    instructions.AddRange(instr);
+                case AST_Declaration decl:
+                    switch (decl.Init)
+                    {
+                        case AST_Factor init:
+                            // treat declaration with initializer like an assignment expression
+                            AST_Assignment asmt = new(new AST_Var(new(declaration.Name)), init);
+                            var (instr, _) = EmitForExpression(asmt);
+                            instructions.AddRange(instr);
+                            break;
+                        default:
+                            // don't generate instructions for declaration without initializer
+                            break;
+                    }
                     break;
-                default:
-                    // don't generate instructions for declaration without initializer
+                case AST_Label label:
+                    instructions.Add(new TAC_Label(Utilities.GenerateUniqueLabel(label.Name)));
                     break;
             }
 
@@ -426,7 +434,7 @@ namespace myc
                 //inc/dec first 
                 var (binInst, binValue) = EmitBinary(new AST_Binary(incDec.Factor, incDec.BinaryOp, new AST_Int(1)));
                 // set the original Value to the new value
-                var( facInst, dst) = EmitForExpression(incDec.Factor);
+                var (facInst, dst) = EmitForExpression(incDec.Factor);
                 binInst.AddRange(facInst);
                 binInst.Add(new TAC_Copy(binValue, dst));
                 //return instructions and original factor

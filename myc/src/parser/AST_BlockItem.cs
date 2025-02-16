@@ -34,9 +34,9 @@ namespace myc
         }
     }
 
-    public class AST_BlockDeclaration(AST_Declaration declaration) : AST_BlockItem
+    public class AST_BlockDeclaration(AST_Decl declaration) : AST_BlockItem
     {
-        public readonly AST_Declaration Declaration = declaration;
+        public readonly AST_Decl Declaration = declaration;
 
         public override string Print()
         {
